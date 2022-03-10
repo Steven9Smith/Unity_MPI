@@ -1,0 +1,103 @@
+﻿  stdafx.cpp
+  dllmain.cpp
+  MpiLibrary.cpp
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(1): warning C4603: 'WINDOWS_BUILD': macro is not defined or definition is different after precompiled header use
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(1): note: Add macro to precompiled header instead of defining here
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(5): note: use of precompiled header
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(11): warning C4273: 'initialize_mpi': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(15): note: see previous definition of 'initialize_mpi'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(16): warning C4273: 'finalize_mpi': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(17): note: see previous definition of 'finalize_mpi'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(22): warning C4273: 'get_world_size': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(20): note: see previous definition of 'get_world_size'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(28): warning C4273: 'mpi_barrier': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(35): note: see previous definition of 'mpi_barrier'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(33): warning C4273: 'mpi_wtime': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(37): note: see previous definition of 'mpi_wtime'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(45): warning C4273: 'mpi_send_char': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(49): note: see previous definition of 'mpi_send_char'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(48): warning C4273: 'mpi_send_int': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(48): note: see previous definition of 'mpi_send_int'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(51): warning C4273: 'mpi_send_float': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(50): note: see previous definition of 'mpi_send_float'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(54): warning C4273: 'mpi_send_double': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(47): note: see previous definition of 'mpi_send_double'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(57): warning C4273: 'mpi_send_short': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(51): note: see previous definition of 'mpi_send_short'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(60): warning C4273: 'mpi_send_long': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(52): note: see previous definition of 'mpi_send_long'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(69): warning C4273: 'mpi_send_schar': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(56): note: see previous definition of 'mpi_send_schar'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(72): warning C4273: 'mpi_send_ushort': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(53): note: see previous definition of 'mpi_send_ushort'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(76): warning C4273: 'mpi_send_char_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(60): note: see previous definition of 'mpi_send_char_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(79): warning C4273: 'mpi_send_int_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(59): note: see previous definition of 'mpi_send_int_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(82): warning C4273: 'mpi_send_float_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(61): note: see previous definition of 'mpi_send_float_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(85): warning C4273: 'mpi_send_double_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(58): note: see previous definition of 'mpi_send_double_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(88): warning C4273: 'mpi_send_short_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(62): note: see previous definition of 'mpi_send_short_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(91): warning C4273: 'mpi_send_long_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(63): note: see previous definition of 'mpi_send_long_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(100): warning C4273: 'mpi_send_schar_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(65): note: see previous definition of 'mpi_send_schar_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(103): warning C4273: 'mpi_send_ushort_array': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(66): note: see previous definition of 'mpi_send_ushort_array'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(109): warning C4273: 'mpi_ssendc': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(72): note: see previous definition of 'mpi_ssendc'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(112): warning C4273: 'mpi_ssendi': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(71): note: see previous definition of 'mpi_ssendi'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(115): warning C4273: 'mpi_ssendf': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(73): note: see previous definition of 'mpi_ssendf'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(117): warning C4273: 'mpi_ssendd': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(70): note: see previous definition of 'mpi_ssendd'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(147): warning C4273: 'mpi_rsendc': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(87): note: see previous definition of 'mpi_rsendc'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(150): warning C4273: 'mpi_rsendi': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(86): note: see previous definition of 'mpi_rsendi'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(153): warning C4273: 'mpi_rsendf': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(88): note: see previous definition of 'mpi_rsendf'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(155): warning C4273: 'mpi_rsendd': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(85): note: see previous definition of 'mpi_rsendd'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(163): warning C4273: 'mpi_recv': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(92): note: see previous definition of 'mpi_recv'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(166): warning C4273: 'mpi_recvi_legacy_not_working': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(93): note: see previous definition of 'mpi_recvi_legacy_not_working'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(177): warning C4273: 'mpi_recv_populate_status': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(39): note: see previous definition of 'mpi_recv_populate_status'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(179): error C2039: 'count_hi_and_cancelled': is not a member of 'MPI_Status'
+  c:\program files (x86)\microsoft sdks\mpi\include\mpi.h(478): note: see declaration of 'MPI_Status'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(180): error C2039: 'count_hi_and_cancelled': is not a member of 'MPI_Status'
+  c:\program files (x86)\microsoft sdks\mpi\include\mpi.h(478): note: see declaration of 'MPI_Status'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(191): warning C4273: 'mpi_recv_int': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(94): note: see previous definition of 'mpi_recv_int'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(198): warning C4273: 'mpi_recv_char': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(96): note: see previous definition of 'mpi_recv_char'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(205): warning C4273: 'mpi_recv_float': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(100): note: see previous definition of 'mpi_recv_float'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(212): warning C4273: 'mpi_recv_double': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(98): note: see previous definition of 'mpi_recv_double'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(219): warning C4273: 'mpi_recv_short': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(102): note: see previous definition of 'mpi_recv_short'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(226): warning C4273: 'mpi_recv_long': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(104): note: see previous definition of 'mpi_recv_long'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(235): warning C4273: 'get_world_rank': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(23): note: see previous definition of 'get_world_rank'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(242): warning C4273: 'all_reduce_int': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(25): note: see previous definition of 'all_reduce_int'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(247): warning C4273: 'all_reduce_floatarray': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(27): note: see previous definition of 'all_reduce_floatarray'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(253): warning C4273: 'get_one': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(30): note: see previous definition of 'get_one'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(259): warning C4273: 'add_two_numbers': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(33): note: see previous definition of 'add_two_numbers'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(265): warning C4273: 'external_call': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(117): note: see previous definition of 'external_call'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(271): warning C4273: 'external_reduce': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(121): note: see previous definition of 'external_reduce'
+e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.cpp(288): warning C4273: 'external_reduce_with_callback': inconsistent dll linkage
+  e:\documents\github\unity_mpi\mpidotnet\mpilibrary\mpilibrary\mpilibrary.h(125): note: see previous definition of 'external_reduce_with_callback'
+  Generating Code...

@@ -1,0 +1,8 @@
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.deps.json
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.dll
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.pdb
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.AssemblyInfoInputs.cache
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.AssemblyInfo.cs
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.csproj.CoreCompileInputs.cache
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.dll
+E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.pdb

@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = MpiDotNetApp
+build_property.ProjectDir = /home/node1/Documents/MpiDotNet/MpiDotNetApp/MpiDotNetApp/

@@ -1,0 +1,413 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Extensions.ML</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Extensions.ML.BuilderExtensions">
+            <summary>
+            Extension methods for <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String)">
+            <summary>
+            Adds the model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="uri">The location of the model.</param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.String)">
+            <summary>
+            Adds the named model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="uri">The location of the model.</param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.Uri)">
+            <summary>
+            Adds the named model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="uri">The location of the model.</param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.TimeSpan)">
+            <summary>
+            Adds the model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="uri">The location of the model.</param>
+            <param name="period">
+            How often to query if the model has been updated at the specified location.
+            </param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.String,System.TimeSpan)">
+            <summary>
+            Adds the named model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="uri">The location of the model.</param>
+            <param name="period">
+            How often to query if the model has been updated at the specified location.
+            </param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromUri``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.Uri,System.TimeSpan)">
+            <summary>
+            Adds the named model at the specified location to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="uri">The location of the model.</param>
+            <param name="period">
+            How often to query if the model has been updated at the specified location.
+            </param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromFile``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String)">
+            <summary>
+            Adds the model at the specified file to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="filePath">The location of the model.</param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromFile``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.Boolean)">
+            <summary>
+            Adds the model at the specified file to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="filePath">The location of the model.</param>
+            <param name="watchForChanges">
+            Whether to watch for changes to the file path and update the model when the file is changed or not.
+            </param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromFile``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.String)">
+            <summary>
+            Adds the model at the specified file to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="filePath">The location of the model.</param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.BuilderExtensions.FromFile``2(Microsoft.Extensions.ML.PredictionEnginePoolBuilder{``0,``1},System.String,System.String,System.Boolean)">
+            <summary>
+            Adds the model at the specified file to the builder.
+            </summary>
+            <param name="builder">The builder to which to add the model.</param>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="filePath">The location of the model.</param>
+            <param name="watchForChanges">
+            Whether to watch for changes to the file path and update the model when the file is changed or not.
+            </param>
+            <returns>
+            The updated <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2">
+            <summary>
+            A class that provides the mechanisms to configure a pool
+            of ML.NET <see cref="T:Microsoft.ML.PredictionEngine`2"/> objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2.#ctor(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Initializes a new instance of <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </summary>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add services to.</param>
+        </member>
+        <member name="P:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2.Services">
+            <summary>
+            The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add services to.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.MLOptions">
+            <summary>
+            Provides options for ML.NET objects.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.MLOptions.#ctor">
+            <summary>
+            Initializes a new instance of <see cref="T:Microsoft.Extensions.ML.MLOptions"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.ML.MLOptions.MLContext">
+            <summary>
+            The <see cref="P:Microsoft.Extensions.ML.MLOptions.MLContext"/> which all the ML.NET operations happen.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PostMLContextOptionsConfiguration">
+            <summary>
+            Configures the <see cref="T:Microsoft.Extensions.ML.MLOptions"/> type.
+            </summary>
+            <remarks>
+            Note: This is run after all <see cref="T:Microsoft.Extensions.Options.IConfigureOptions`1"/>.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PostMLContextOptionsConfiguration.#ctor(Microsoft.Extensions.Logging.ILogger{Microsoft.ML.MLContext})">
+            <summary>
+            Initializes a new instance of <see cref="T:Microsoft.Extensions.ML.PostMLContextOptionsConfiguration"/>.
+            </summary>
+            <param name="logger">The <see cref="T:Microsoft.Extensions.Logging.ILogger"/> to write to.</param>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PostMLContextOptionsConfiguration.PostConfigure(System.String,Microsoft.Extensions.ML.MLOptions)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Extensions.ML.ModelLoader">
+            <summary>
+            Defines a class that provides the mechanisms to load an ML.NET model
+            and to propagate notifications that the source of the model has changed.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ModelLoader.GetReloadToken">
+            <summary>
+            Gets an object that can propagate notifications that
+            the model has changed.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ModelLoader.GetModel">
+            <summary>
+            Gets the ML.NET model.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.ModelReloadToken">
+            <summary>
+            Implements <see cref="T:Microsoft.Extensions.Primitives.IChangeToken"/>
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.ML.ModelReloadToken.ActiveChangeCallbacks">
+            <summary>
+            Indicates if this token will proactively raise callbacks.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.ML.ModelReloadToken.HasChanged">
+            <summary>
+            Gets a value that indicates if a change has occurred.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ModelReloadToken.RegisterChangeCallback(System.Action{System.Object},System.Object)">
+            <summary>
+            Registers for a callback that will be invoked when the entry has changed. <see cref="P:Microsoft.Extensions.Primitives.IChangeToken.HasChanged"/>
+            MUST be set before the callback is invoked.
+            </summary>
+            <param name="callback">The callback to invoke.</param>
+            <param name="state">State to be passed into the callback.</param>
+            <returns>
+            An System.IDisposable that is used to unregister the callback.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ModelReloadToken.OnReload">
+            <summary>
+            Used to trigger the change token when a reload occurs.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PoolLoader`2">
+            <summary>
+            Encapsulates the data and logic required for loading and reloading PredictionEngine object pools.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PredictionEnginePool`2">
+            <summary>
+            Provides a pool of <see cref="T:Microsoft.ML.PredictionEngine`2"/> objects
+            that can be used to make predictions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.GetModel(System.String)">
+            <summary>
+            Get the Model used to create the pooled PredictionEngine.
+            </summary>
+            <param name="modelName">
+            The name of the model. Used when there are multiple models with the same input/output.
+            </param>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.GetModel">
+            <summary>
+            Get the Model used to create the pooled PredictionEngine.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.GetPredictionEngine">
+            <summary>
+            Gets a PredictionEngine that can be used to make predictions using
+            <typeparamref name="TData"/> and <typeparamref name="TPrediction"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.GetPredictionEngine(System.String)">
+            <summary>
+            Gets a PredictionEngine for a named model.
+            </summary>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.ReturnPredictionEngine(Microsoft.ML.PredictionEngine{`0,`1})">
+            <summary>
+            Returns a rented PredictionEngine to the pool.
+            </summary>
+            <param name="engine">The rented PredictionEngine.</param>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePool`2.ReturnPredictionEngine(System.String,Microsoft.ML.PredictionEngine{`0,`1})">
+            <summary>
+            Returns a rented PredictionEngine to the pool.
+            </summary>
+            <param name="modelName">
+            The name of the model which allows for uniquely identifying the model when
+            multiple models have the same <typeparamref name="TData"/> and
+            <typeparamref name="TPrediction"/> types.
+            </param>
+            <param name="engine">The rented PredictionEngine.</param>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PredictionEnginePoolExtensions">
+            <summary>
+            Extension methods for <see cref="T:Microsoft.Extensions.ML.PredictionEnginePool`2"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolExtensions.Predict``2(Microsoft.Extensions.ML.PredictionEnginePool{``0,``1},``0)">
+            <summary>
+            Run prediction pipeline on one example using a PredictionEngine from the pool.
+            </summary>
+            <param name="predictionEnginePool">
+            The pool of PredictionEngine instances to get the PredictionEngine.
+            </param>
+            <param name="example">The example to run on.</param>
+            <returns>The result of prediction. A new object is created for every call.</returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolExtensions.Predict``2(Microsoft.Extensions.ML.PredictionEnginePool{``0,``1},System.String,``0)">
+            <summary>
+            Run prediction pipeline on one example using a PredictionEngine from the pool.
+            </summary>
+            <param name="predictionEnginePool">
+            The pool of PredictionEngine instances to get the PredictionEngine.
+            </param>
+            <param name="modelName">
+            The name of the model. Used when there are multiple models with the same input/output.
+            </param>
+            <param name="example">The example to run on.</param>
+            <returns>The result of prediction. A new object is created for every call.</returns>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PredictionEnginePoolOptions`2">
+            <summary>
+            Specifies the options to use when creating a <see cref="T:Microsoft.Extensions.ML.PredictionEnginePool`2"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Extensions.ML.PredictionEnginePoolOptions`2.ModelLoader">
+            <summary>
+            Gets the <see cref="P:Microsoft.Extensions.ML.PredictionEnginePoolOptions`2.ModelLoader"/> object used to load the model
+            from the source location.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Extensions.ML.PredictionEnginePoolPolicy`2">
+            <summary>
+            <see cref="T:Microsoft.Extensions.ObjectPool.PooledObjectPolicy`1"/> for <see cref="T:Microsoft.ML.PredictionEngine`2"/>
+            which is responsible for creating pooled objects, and when to return objects to the pool.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolPolicy`2.#ctor(Microsoft.ML.MLContext,Microsoft.ML.ITransformer)">
+            <summary>
+            Initializes a new instance of <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolPolicy`2"/>.
+            </summary>
+            <param name="mlContext">
+            <see cref="T:Microsoft.ML.MLContext"/> used to load the model.
+            </param>
+            <param name="model">The transformer to use for prediction.</param>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolPolicy`2.Create">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Extensions.ML.PredictionEnginePoolPolicy`2.Return(Microsoft.ML.PredictionEngine{`0,`1})">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Extensions.ML.ServiceCollectionExtensions">
+            <summary>
+            Extension methods for <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ServiceCollectionExtensions.AddPredictionEnginePool``2(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds a <see cref="T:Microsoft.Extensions.ML.PredictionEnginePool`2"/> and required config services to the service collection.
+            </summary>
+            <param name="services">
+            The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add services to.
+            </param>
+            <returns>
+            The <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/> that was added to the collection.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ServiceCollectionExtensions.AddPredictionEnginePool``2(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{System.IServiceProvider,Microsoft.Extensions.ML.PredictionEnginePool{``0,``1}})">
+            <summary>
+            Adds a <see cref="T:Microsoft.Extensions.ML.PredictionEnginePool`2"/> and required config services to the service collection.
+            </summary>
+            <param name="services">
+            The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add services to.
+            </param>
+            <param name="implementationFactory">
+            The factory that creates the <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/>.
+            </param>
+            <returns>
+            The <see cref="T:Microsoft.Extensions.ML.PredictionEnginePoolBuilder`2"/> that was added to the collection.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Extensions.ML.ServiceCollectionExtensions.AddRequiredPredictionEnginePoolServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds only the required config services for <see cref="T:Microsoft.Extensions.ML.PredictionEnginePool`2"/> to the service collection.
+            </summary>
+            <param name="services">
+            The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to add services to.
+            </param>
+            <returns>
+            A reference to this instance after the operation has completed.
+            </returns>
+        </member>
+    </members>
+</doc>
