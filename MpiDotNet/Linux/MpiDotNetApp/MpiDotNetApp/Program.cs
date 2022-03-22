@@ -40,8 +40,18 @@ namespace DotNetClient
 
                 Console.WriteLine($"Rank-{worldRank}: bias={biasAndWeights[0]} weight[0]={biasAndWeights[1]} | bias={averageBiasAndWeights[0]} weight[0]={averageBiasAndWeights[1]}");
             }*/
-            Test_Suite();
+          //  Test_Suite();
          //   MPI_COMMUNICATION_TEST();
+            MpiManagerTest();
+            Console.WriteLine("Finished!");
+        }
+        static void MpiManagerTest(){
+            MpiManager manager = new MpiManager(new string[]{});
+            
+            if (manager.worldRank == 0){
+                Console.WriteLine("MpiManager Info:\n"+manager.ToString());
+            
+            }
         }
         static void Test_Suite(){
             using (var mpi = new Mpi(new string[]{}))

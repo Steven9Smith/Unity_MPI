@@ -1,6 +1,8 @@
 {
     "files.associations": {
+        "*.h": "cpp",
         "algorithm": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "array": "cpp"
     }
 }

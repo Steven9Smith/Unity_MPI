@@ -1,7 +1,7 @@
 // MpiLibrary.cpp : Defines the exported functions for the DLL.
 #include "stdafx.h"
-#include <mpi.h>
 #include "MpiLibrary.h"
+#include <mpi.h>
 #include <iostream>
 
 // Initialize MPI
@@ -60,7 +60,6 @@ int mpi_send_long(long buf, int count, int dest, int tag){
 int mpi_send_ulong(unsigned long buf, int count, int dest, int tag){
 	return MPI_Send(&buf,count,MPI_UNSIGNED_LONG,dest,tag,MPI_COMM_WORLD);
 }
-
 int mpi_send_uchar(unsigned char buf, int count, int dest, int tag){
 	return MPI_Send(&buf,count,MPI_UNSIGNED_CHAR,dest,tag,MPI_COMM_WORLD);
 }
@@ -171,15 +170,13 @@ int mpi_recvi_legacy_not_working(int& buf, int count, int source, int tag, MPI_S
 }
 
 // extracts status values and assigns them to the referenced ints
-void mpi_recv_populate_status(int& status_count_lo, int& status_count_hi_and_cancelled, int& status_MPI_SOURCE,
-	int& status_MPI_TAG, int& status_MPI_ERROR, MPI_Status status) {
-	//	status_count_lo = status.count_hi_and_cancelled;
-	//	status_count_hi_and_cancelled = status.count_hi_and_cancelled;
-	status_count_lo = -1;
-	status_count_hi_and_cancelled = -1;
-	status_MPI_SOURCE = status.MPI_SOURCE;
-	status_MPI_TAG = status.MPI_TAG;
-	status_MPI_ERROR = status.MPI_ERROR;
+void mpi_recv_populate_status(int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+    int& status_MPI_TAG,int& status_MPI_ERROR,MPI_Status status){
+		status_count_lo = 0;
+		status_count_hi_and_cancelled = 0;
+		status_MPI_SOURCE = status.MPI_SOURCE;
+		status_MPI_TAG = status.MPI_TAG;
+		status_MPI_ERROR = status.MPI_ERROR;
 }
 #pragma region
 int mpi_recv_int(int& buf, int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
@@ -266,7 +263,7 @@ int mpi_recv_ulong(unsigned long& buf, int count, int source, int tag,int& statu
 		int a = MPI_Recv(buf,count,MPI_CHAR,source,tag,MPI_COMM_WORLD,&status);
 		mpi_recv_populate_status(status_count_lo,status_count_hi_and_cancelled,status_MPI_SOURCE,status_MPI_TAG,status_MPI_ERROR,status);
 		return a;
-	}
+	}	
 	int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     	int& status_MPI_TAG,int& status_MPI_ERROR){
 		MPI_Status status;

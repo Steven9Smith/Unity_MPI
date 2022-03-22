@@ -59,6 +59,7 @@
 000000000000272a T mpi_send_short_array
 0000000000002566 T mpi_send_uchar
 00000000000027ea T mpi_send_uchar_array
+00000000000027aa T mpi_send_ulong_array
 00000000000025e8 T mpi_send_ushort
 000000000000286a T mpi_send_ushort_array
                  U MPI_Ssend
@@ -87,7 +88,6 @@
 00000000000039b6 T _Z20mpi_recv_short_arrayPsiiiRiS0_S0_S0_S0_
 0000000000003b68 T _Z20mpi_recv_uchar_arrayPhiiiRiS0_S0_S0_S0_
 0000000000003df3 T _Z20mpi_recv_ulong_arrayPmiiiRiS0_S0_S0_S0_
-00000000000027aa T _Z20mpi_send_ulong_arrayPliii
 0000000000003804 T _Z21mpi_recv_double_arrayPdiiiRiS0_S0_S0_S0_
 0000000000003d1a T _Z21mpi_recv_ushort_arrayPtiiiRiS0_S0_S0_S0_
                  U _ZNSt8ios_base4InitC1Ev

@@ -263,7 +263,7 @@ int mpi_recv_ulong(unsigned long& buf, int count, int source, int tag,int& statu
 		int a = MPI_Recv(buf,count,MPI_CHAR,source,tag,MPI_COMM_WORLD,&status);
 		mpi_recv_populate_status(status_count_lo,status_count_hi_and_cancelled,status_MPI_SOURCE,status_MPI_TAG,status_MPI_ERROR,status);
 		return a;
-	}
+	}	
 	int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     	int& status_MPI_TAG,int& status_MPI_ERROR){
 		MPI_Status status;

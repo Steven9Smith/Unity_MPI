@@ -1,6 +1,9 @@
-﻿using System;
+﻿
+
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+
 
 
 namespace MpiLibrary
@@ -14,6 +17,12 @@ namespace MpiLibrary
             public int MPI_SOURCE;
             public int MPI_TAG;
             public int MPI_ERROR;
+
+            public override string ToString()
+            {
+                return $"Mpi_Status:\n\tcount_lo: {count_lo} \n\t count_hi_and_cancelled: {count_hi_and_cancelled} \n\tsource: {MPI_SOURCE} \n\t"
+                +$"tag: {MPI_TAG} \n\terror: {MPI_ERROR}";
+            }
         }
         public enum MPI_Datatype : uint{
             //Null datatype
@@ -254,7 +263,7 @@ namespace MpiLibrary
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_send_ulong_array(ulong[] buf, int count, int dest, int tag);
     #endregion
-
+    #region MPI_SSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_ssendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -263,7 +272,8 @@ namespace MpiLibrary
         private static extern int mpi_ssendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_ssendf(float buf, int count, int dest, int tag);
-
+    #endregion
+    #region MPI_BSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_bsendd(double buf, int count, int dest, int tag,ref int mpi_request);
         [DllImport(MPI_LIBRARY)]
@@ -272,7 +282,8 @@ namespace MpiLibrary
         private static extern int mpi_bsendc(char buf, int count, int dest, int tag,ref int mpi_request);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_bsendf(float buf, int count, int dest, int tag,ref int mpi_request);
-
+    #endregion
+    #region MPI_ISEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_isendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -281,7 +292,8 @@ namespace MpiLibrary
         private static extern int mpi_isendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_isendf(float buf, int count, int dest, int tag);
-
+    #endregion
+    #region MPI_RSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_rsendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -290,8 +302,7 @@ namespace MpiLibrary
         private static extern int mpi_rsendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_rsendf(float buf, int count, int dest, int tag);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recvi(ref int buf, int count, MPI_Datatype datatype, int source, int tag,ref MPI_Status status);
+    #endregion
     #region MPI_Recv
          [DllImport(MPI_LIBRARY)]
         private static extern int mpi_recv_int(ref int buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
@@ -326,36 +337,36 @@ namespace MpiLibrary
     #endregion
     #region MPI_Recv_Array
 
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z18mpi_recv_int_arrayPiiiiRiS0_S0_S0_S0_(int[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_int_array([Out]int[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
     ref int status_MPI_TAG,ref int status_MPI_ERROR);
     
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z19mpi_recv_char_arrayPciiiRiS0_S0_S0_S0_(char[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_char_array([Out]char[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z20mpi_recv_float_arrayPfiiiRiS0_S0_S0_S0_(float[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_float_array([Out]float[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z21mpi_recv_double_arrayPdiiiRiS0_S0_S0_S0_(double[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_double_array([Out]double[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z20mpi_recv_short_arrayPsiiiRiS0_S0_S0_S0_(short[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_short_array([Out]short[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z19mpi_recv_long_arrayPliiiRiS0_S0_S0_S0_(long[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_long_array([Out]long[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z20mpi_recv_uchar_arrayPhiiiRiS0_S0_S0_S0_(byte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_uchar_array([Out]byte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z20mpi_recv_schar_arrayPaiiiRiS0_S0_S0_S0_(sbyte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_schar_array([Out]sbyte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z21mpi_recv_ushort_arrayPtiiiRiS0_S0_S0_S0_(ushort[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ushort_array([Out]ushort[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY)]
-        private static extern int _Z20mpi_recv_ulong_arrayPmiiiRiS0_S0_S0_S0_(ulong[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
+        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ulong_array([Out]ulong[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
     #endregion
         /// <summary>
@@ -692,7 +703,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z18mpi_recv_int_arrayPiiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_int_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
             status = new MPI_Status{
                 count_lo = status_count_lo,
@@ -710,9 +721,8 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z19mpi_recv_char_arrayPciiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_char_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
-
             status = new MPI_Status{
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
@@ -729,7 +739,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z19mpi_recv_long_arrayPliiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_long_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -748,7 +758,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z20mpi_recv_float_arrayPfiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_float_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -767,7 +777,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z20mpi_recv_schar_arrayPaiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_schar_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -786,7 +796,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z20mpi_recv_short_arrayPsiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_short_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -805,7 +815,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z20mpi_recv_uchar_arrayPhiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_uchar_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -824,7 +834,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z20mpi_recv_ulong_arrayPmiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_ulong_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -843,7 +853,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z21mpi_recv_double_arrayPdiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_double_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -862,7 +872,7 @@ namespace MpiLibrary
             int status_MPI_SOURCE = -1; 
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = _Z21mpi_recv_ushort_arrayPtiiiRiS0_S0_S0_S0_(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
+            int response = mpi_recv_ushort_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
             ref status_MPI_TAG,ref status_MPI_ERROR);
 
             status = new MPI_Status{
@@ -1002,5 +1012,261 @@ namespace MpiLibrary
         {
             return external_reduce_with_callback(reduceFunc, array, arraySize);
         }
+
     }
+
+    public static class MpiExtensions {
+        // Display Output
+        public static void DO(object obj,int worldRank = -1){
+            Console.WriteLine($"{worldRank}::Log::{obj}");
+        }
+        public static void DO(this MpiManager manager,object obj){
+            Console.WriteLine($"{manager.worldRank}::Log::{obj}");
+        }
+        // Display Error
+        public static void DE(object obj,int worldRank = -1){
+            Console.WriteLine($"{worldRank}::ERROR::{obj}");
+        }
+        public static void DE(this MpiManager manager,object obj){
+            Console.WriteLine($"{manager.worldRank}::ERROR::{obj}");
+        }
+        // Display Warning
+        public static void DW(object obj,int worldRank = -1){
+            Console.WriteLine($"{worldRank}::WARNING::{obj}");
+        }
+        public static void DW(this MpiManager manager,object obj){
+            Console.WriteLine($"{manager.worldRank}::WARNING::{obj}");
+        }
+    }
+
+    #region MPI_Manager
+    public class MpiManager : IDisposable{
+        public static Mpi mpi = null;    
+        // MPI Manager is set to use tags 12345 - (12345+worldSize) so please try not to use them for data passing
+        public static readonly int MPI_MANAGER_MIN_COMMUNICATION_TAG = 12345;
+        public static int MPI_MANAGER_MAX_COMMINICATION_TAG;
+        public int worldRank;
+        public int worldSize;
+        public MpiSystemInformation[] SYSTEM_INFO;
+        public MpiManager(string[] args){
+            Console.WriteLine("Initializing MpiManager");
+            mpi = new Mpi(args);
+            worldRank = mpi.GetWorldRank();
+            worldSize = mpi.GetWorldSize();
+            Console.WriteLine($"got {worldRank} of {(worldSize-1)}");
+            SYSTEM_INFO = new MpiSystemInformation[worldSize];
+            SYSTEM_INFO[worldRank] = new MpiSystemInformation();
+            SYSTEM_INFO[worldRank].Initialize();
+            MPI_MANAGER_MAX_COMMINICATION_TAG = MPI_MANAGER_MIN_COMMUNICATION_TAG+(worldSize*2);
+            // send information data 
+            string systemInformation = SYSTEM_INFO[worldRank].ToString().Replace("\t","");
+            char[] arr = systemInformation.ToCharArray();
+            //send size of string buffer
+            for(int i = 0; i < worldSize; i++){
+                if(i != worldRank){
+                    this.DO($"Sending buffer length {arr.Length} and buffer to node {i} at tag {MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+i} & {MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+i+worldSize }");
+                    mpi.MPI_Send(arr.Length,1,i,MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+i);
+                    // send string buffer
+                    mpi.MPI_Send(arr,arr.Length,i,MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+worldSize+i);
+                }
+            }
+            for(int i = 0; i < worldSize; i++){
+                if(i != worldRank){
+                    int buffer_size = -1;
+                    this.DO($"Recieving data from node {i} from tag {MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+worldRank}");
+                    mpi.MPI_Recv(ref buffer_size,1,i,MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+worldRank,out Mpi.MPI_Status status);
+                    char[] buffer = new char[buffer_size];
+                    this.DO($"Got a buffer of size {buffer_size} with status \n{status}");
+                    mpi.MPI_Recv(ref buffer,buffer_size,i,MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+worldRank+worldSize,out status);
+                    this.DO($"done receiving data from node {i} from tag {MpiManager.MPI_MANAGER_MIN_COMMUNICATION_TAG+worldRank+worldSize}...Now populating SYSTEN_INFO {i} of {worldSize-1} with status \n {status}");
+                    SYSTEM_INFO[i] = new MpiSystemInformation();
+                    if(buffer == null) MpiExtensions.DE("buffer is null!");
+                    else SYSTEM_INFO[i].Initialize(buffer);
+                }
+            }
+            this.DO("Finished setting up MpiManager!");
+        }
+
+        ///<summary>Goes through the stored SYSYTEM_INFO and compares the PROCESSOR_COUNT with the minPRocessCount.</summary>
+        ///<param name="minProcessorCount">minimum desired amount of Processor Cores within a system</param>
+        ///<param name="returnFirstFoundOnly">set to true so that the first system that satifies the criteria is returned immediately at index 0</param>
+        ///<returns>an int[] of worldRanks that meet the criteria</returns>
+        public int[] FindSystemsWithMinOfXProcessors(int minProcessorCount,bool returnFirstFoundOnly = false){
+            int[] tmp = new int[worldSize];
+            int index = 0;
+            int[] indicies = new int[]{-1};
+            for(int i = 0; i < worldSize;i++){
+                if(SYSTEM_INFO[i].PROCESSOR_COUNT >= minProcessorCount){
+                    if(returnFirstFoundOnly){
+                        return new int[]{i};
+                    }else{
+                        tmp[index] = i;
+                        index++;
+                    }
+                }
+            }
+            if(index > 0){
+                indicies = new int[index+1];
+                for(int i = 0; i < indicies.Length; i++)
+                    indicies[i] = tmp[i];
+            }
+            return indicies;
+        }
+
+        public void Dispose(){
+            mpi.Dispose();
+        }
+
+        public override string ToString()
+        {
+            if(SYSTEM_INFO == null) this.DE("SYSTEM_INFO is null!");
+            else{
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(string.Empty);
+                for(int i = 0; i < SYSTEM_INFO.Length; i++){
+                    sb.Append($"System Info {i} of {worldSize-1}:\n"+SYSTEM_INFO[i].ToString()+"\n");
+                }
+                return sb.ToString();
+            }
+            return "";
+        }
+        public struct MpiSystemInformation {
+            public int worldRank;
+            public OperatingSystem OS;
+            public string PROCESSOR_ARCHITECTURE;
+            public string PROCESSOR_IDENTIFIER;
+            public string PROCESSOR_LEVEL;
+            public string SYSTEM_DIRECTORY;
+            public int PROCESSOR_COUNT; 
+            public string DOMAIN_NAME;
+            public string USER_NAME;
+
+            public System.IO.DriveInfo[] LOGIACAL_DRIVES;
+
+            public void Initialize(char[] arr){
+                try{
+                    if(arr == null){
+                        MpiExtensions.DE("given arr is null");
+                        return;
+                    } 
+                    string a = new string(arr);
+                    string[] s = a.Split("\n");
+                    if(s.Length < 8)
+                        MpiExtensions.DO("MpiSystemInformation: Given data string has less data than expeceted!");
+                    else{
+                        MpiExtensions.DO($"MpiSystemInformation: Initializing with string of size {s.Length}");
+                        // Get OS Information
+                        string[] ss = s[0].Split(".");
+                        string[] sa = ss[0].Split(" ");
+                        int major = 0;
+                        int minor = 0;
+                        int build = 0;
+                        int revision = 0;
+                        if(ss.Length > 0)
+                            int.TryParse(sa[sa.Length-1],out major);
+                        if(ss.Length > 1)
+                            int.TryParse(ss[1],out minor);
+                        if(ss.Length > 2)
+                            int.TryParse(ss[2],out build);
+                        if(ss.Length > 3)
+                            int.TryParse(ss[3],out revision);
+                      //  MpiExtensions.DO($"{major}, {minor}, {build}, {revision}");
+                        OS = new OperatingSystem(s[0].Contains("Unix") ? PlatformID.Unix : PlatformID.Win32NT, new Version(major,minor,build,revision));
+                        PROCESSOR_ARCHITECTURE = s[1];
+                        PROCESSOR_IDENTIFIER = s[2];
+                        PROCESSOR_LEVEL = s[3];
+                        SYSTEM_DIRECTORY = s[4];
+                        ss = s[5].Split(" ");
+                        PROCESSOR_COUNT = int.Parse(ss[ss.Length-1]);
+                        DOMAIN_NAME = s[6];
+                        USER_NAME = s[7];
+                   //     LOGIACAL_DRIVES = new System.IO.DriveInfo[s.Length-8];
+                   //     for(int i = 0; i < LOGIACAL_DRIVES.Length; i++)
+                   //         LOGIACAL_DRIVES[i] = new System.IO.DriveInfo(s[7+i][0]+"");
+                        MpiExtensions.DO("finished updating other system info!");
+                    }
+                }catch(Exception e){MpiExtensions.DE(e.Message);}
+            }
+
+            public void Initialize(){
+                OS = Environment.OSVersion;
+                PROCESSOR_ARCHITECTURE = Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE");
+                PROCESSOR_IDENTIFIER = Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER");
+                PROCESSOR_LEVEL = Environment.GetEnvironmentVariable("PROCESSOR_LEVEL");
+                SYSTEM_DIRECTORY = Environment.SystemDirectory;
+                PROCESSOR_COUNT = Environment.ProcessorCount;
+                DOMAIN_NAME = Environment.UserDomainName;
+                USER_NAME = Environment.UserName;
+
+                LOGIACAL_DRIVES = System.IO.DriveInfo.GetDrives();
+            }
+
+            public override string ToString()
+            {
+                // this method is a modified verions of the method found at this site:
+                //https://morgantechspace.com/2015/08/get-system-information-in-c-sharp.html
+                System.Text.StringBuilder systemInfo = new System.Text.StringBuilder(string.Empty);
+ 
+                systemInfo.AppendFormat("Operation System:  {0}\n", OS == null ? "NULL" : OS.ToString());
+                systemInfo.AppendFormat("Processor Architecture:  {0}\n", PROCESSOR_ARCHITECTURE);
+                systemInfo.AppendFormat("Processor Model:  {0}\n", PROCESSOR_IDENTIFIER);
+                systemInfo.AppendFormat("Processor Level:  {0}\n", PROCESSOR_LEVEL);
+                systemInfo.AppendFormat("SystemDirectory:  {0}\n", SYSTEM_DIRECTORY);
+                systemInfo.AppendFormat("ProcessorCount:  {0}\n",PROCESSOR_COUNT);
+                systemInfo.AppendFormat("UserDomainName:  {0}\n", DOMAIN_NAME);
+                systemInfo.AppendFormat("UserName: {0}\n",USER_NAME);
+                /*if(LOGIACAL_DRIVES != null){
+                    //Drives
+                    foreach(System.IO.DriveInfo DriveInfo1 in LOGIACAL_DRIVES){
+                        try{
+                            if(DriveInfo1 == null){
+                                systemInfo.AppendFormat("NULL {0}",0);
+                            }
+                            else{
+                                // i really don't care about this atm
+                                
+                                systemInfo.AppendFormat("\tDrive: {0}\n\t\t VolumeLabel: " +
+                                        "{1}\n\t\t DriveType: {2}\n\t\t DriveFormat: {3}\n\t\t " +
+                                        "TotalSize: {4}\n\t\t AvailableFreeSpace: {5}\n",
+                                        DriveInfo1.Name, DriveInfo1.VolumeLabel, DriveInfo1.DriveType,
+                                            DriveInfo1.DriveFormat, DriveInfo1.TotalSize, DriveInfo1.AvailableFreeSpace);
+                            }
+                        }catch(Exception e){systemInfo.AppendFormat("{0}",e.Message);}
+                    }
+                }*/
+                systemInfo.AppendFormat("Version:  {0}", Environment.Version);
+                
+                return systemInfo.ToString();
+            }
+            public string GetThisSystemInformation(){
+                // this method is a modified verions of the method found at this site:
+                //https://morgantechspace.com/2015/08/get-system-information-in-c-sharp.html
+                System.Text.StringBuilder systemInfo = new System.Text.StringBuilder(string.Empty);
+ 
+                systemInfo.AppendFormat("Operation System:  {0}\n", Environment.OSVersion);
+                systemInfo.AppendFormat("Processor Architecture:  {0}\n", Environment.GetEnvironmentVariable("PROCESSOR_ARCHITECTURE",EnvironmentVariableTarget.Machine));
+                systemInfo.AppendFormat("Processor Model:  {0}\n", Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER",EnvironmentVariableTarget.Machine));
+                systemInfo.AppendFormat("Processor Level:  {0}\n", Environment.GetEnvironmentVariable("PROCESSOR_LEVEL",EnvironmentVariableTarget.Machine));
+                systemInfo.AppendFormat("SystemDirectory:  {0}\n", Environment.SystemDirectory);
+                systemInfo.AppendFormat("ProcessorCount:  {0}\n",Environment.ProcessorCount);
+                systemInfo.AppendFormat("UserDomainName:  {0}\n", Environment.UserDomainName);
+                systemInfo.AppendFormat("UserName: {0}\n",Environment.UserName);
+                if(LOGIACAL_DRIVES != null){
+                    //Drives
+                    foreach(System.IO.DriveInfo DriveInfo1 in System.IO.DriveInfo.GetDrives()){
+                        try{
+                            systemInfo.AppendFormat("t Drive: {0}\n\t\t VolumeLabel: " +
+                                    "{1}\n\t\t DriveType: {2}\n\t\t DriveFormat: {3}\n\t\t " +
+                                    "TotalSize: {4}\n\t\t AvailableFreeSpace: {5}\n",
+                                    DriveInfo1.Name, DriveInfo1.VolumeLabel, DriveInfo1.DriveType,
+                                        DriveInfo1.DriveFormat, DriveInfo1.TotalSize, DriveInfo1.AvailableFreeSpace);
+                        }catch(Exception e){}
+                    }
+                    systemInfo.AppendFormat("Version:  {0}", Environment.Version);
+                }
+                Console.WriteLine(systemInfo);
+                return systemInfo.ToString();
+            }
+        }
+    }
+    #endregion
 }

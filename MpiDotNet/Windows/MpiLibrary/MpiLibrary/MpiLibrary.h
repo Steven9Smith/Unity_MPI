@@ -1,5 +1,5 @@
 // MpiLibrary.h - Contains declarations of functions and delegates
-
+#define MpiLIBRARY_EXPORTS
 #pragma once
 #include <mpi.h>
 #ifndef _WINDOWS
@@ -54,6 +54,7 @@ extern "C" MpiLIBRARY_API int mpi_send_ushort(unsigned short buf, int count, int
 extern "C" MpiLIBRARY_API int mpi_send_ulong(unsigned long buf, int count, int dest, int tag);
 extern "C" MpiLIBRARY_API int mpi_send_uchar(unsigned char buf, int count, int dest, int tag);
 extern "C" MpiLIBRARY_API int mpi_send_schar(signed char buf, int count, int dest, int tag);
+
 // MPI_Send array 
 extern "C" MpiLIBRARY_API int mpi_send_double_array(double buf[], int count, int dest, int tag);
 extern "C" MpiLIBRARY_API int mpi_send_int_array(int buf[], int count, int dest, int tag);
@@ -112,25 +113,26 @@ extern "C" MpiLIBRARY_API int mpi_recv_uchar(unsigned char& buf, int count, int 
 extern "C" MpiLIBRARY_API int mpi_recv_schar(signed char& buf, int count, int source, int tag,int& status_count,int& status_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
 
-int mpi_recv_int_array(int buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_int_array(int buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_char_array(char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_char_array(char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+    	int& status_MPI_TAG,int& status_MPI_ERROR);
+
+extern "C" MpiLIBRARY_API int mpi_recv_float_array(float buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_float_array(float buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_short_array(short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_short_array(short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_long_array(long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_long_array(long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_uchar_array(unsigned char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_uchar_array(unsigned char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API  int mpi_recv_schar_array(signed char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_schar_array(signed char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_ushort_array(unsigned short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_ushort_array(unsigned short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
-    int& status_MPI_TAG,int& status_MPI_ERROR);
-int mpi_recv_ulong_array(unsigned long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_ulong_array(unsigned long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
 
 // Call a function with two integers
