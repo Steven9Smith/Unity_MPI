@@ -7,11 +7,13 @@ E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcor
 E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.dll
 E:\Documents\Projects\MpiDotNet\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.pdb
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.deps.json
+E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.runtimeconfig.json
+E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.runtimeconfig.dev.json
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.dll
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\bin\x64\Release\netcoreapp2.1\MpiDotNetApp.pdb
-E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.csprojAssemblyReference.cache
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.AssemblyInfoInputs.cache
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.AssemblyInfo.cs
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.csproj.CoreCompileInputs.cache
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.dll
 E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.pdb
+E:\Documents\GitHub\Unity_MPI\MpiDotNet\Windows\MpiDotNetApp\MpiDotNetApp\obj\x64\Release\netcoreapp2.1\MpiDotNetApp.genruntimeconfig.cache

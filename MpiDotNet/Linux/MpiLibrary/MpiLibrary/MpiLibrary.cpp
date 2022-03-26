@@ -320,6 +320,79 @@ int mpi_recv_ulong(unsigned long& buf, int count, int source, int tag,int& statu
 		mpi_recv_populate_status(status_count_lo,status_count_hi_and_cancelled,status_MPI_SOURCE,status_MPI_TAG,status_MPI_ERROR,status);
 		return a;
 	}
+	////////////////////////////////////////////
+/// MPI_Bcast //////////////////////////////
+////////////////////////////////////////////
+#pragma region MPI_Bcast
+	/// <summary>
+	/// Broadcasts a message from the process with rank "root" to all other processes of the communicator 
+	/// </summary>
+	/// <param name="buf">data buffer to be sent</param>
+	/// <param name="count">number of entries in buffer (integer) </param>
+	/// <param name="root">rank of broadcast root (integer) </param>
+	/// <returns></returns>
+	int mpi_bcast_char(char& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_int(int& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_INT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_float(float& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_FLOAT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_double(double& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_DOUBLE, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_short(short& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_SHORT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_long(long& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_LONG, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_ulong(unsigned long& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_UNSIGNED_LONG, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_uchar(unsigned char& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_UNSIGNED_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_schar(signed char& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_SIGNED_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_ushort(unsigned short& buf, int count, int root) {
+		return MPI_Bcast(&buf, count, MPI_UNSIGNED_SHORT, root, MPI_COMM_WORLD);
+	}
+	// arrays
+	int mpi_bcast_char_array(char buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_int_array(int buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_INT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_float_array(float buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_FLOAT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_double_array(double buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_DOUBLE, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_short_array(short buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_SHORT, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_long_array(long buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_LONG, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_ulong_array(unsigned long buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_UNSIGNED_LONG, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_uchar_array(unsigned char buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_UNSIGNED_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_schar_array(signed char buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_SIGNED_CHAR, root, MPI_COMM_WORLD);
+	}
+	int mpi_bcast_ushort_array(unsigned short buf[], int count, int root) {
+		return MPI_Bcast(buf, count, MPI_UNSIGNED_SHORT, root, MPI_COMM_WORLD);
+	}
+#pragma endregion
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //Get the World Rank
 int get_world_rank()

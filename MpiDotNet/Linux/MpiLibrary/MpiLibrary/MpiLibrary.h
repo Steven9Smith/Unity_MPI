@@ -113,27 +113,56 @@ extern "C" MpiLIBRARY_API int mpi_recv_uchar(unsigned char& buf, int count, int 
 extern "C" MpiLIBRARY_API int mpi_recv_schar(signed char& buf, int count, int source, int tag,int& status_count,int& status_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
 
-extern "C" int mpi_recv_int_array(int buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_int_array(int buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_char_array(char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_char_array(char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     	int& status_MPI_TAG,int& status_MPI_ERROR);
 
-extern "C" int mpi_recv_float_array(float buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_float_array(float buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_double_array(double buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_short_array(short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_short_array(short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_long_array(long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_long_array(long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_uchar_array(unsigned char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_uchar_array(unsigned char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_schar_array(signed char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_schar_array(signed char buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_ushort_array(unsigned short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_ushort_array(unsigned short buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
-extern "C" int mpi_recv_ulong_array(unsigned long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
+extern "C" MpiLIBRARY_API int mpi_recv_ulong_array(unsigned long buf[], int count, int source, int tag,int& status_count_lo,int& status_count_hi_and_cancelled,int& status_MPI_SOURCE,
     int& status_MPI_TAG,int& status_MPI_ERROR);
+///////////////////////////////////
+/// MPI_Bcast /////////////////////
+//////////////////////////////////
+#pragma region MPI_Bcast
+extern "C" MpiLIBRARY_API int mpi_bcast_double(double& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_int(int& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_char(char& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_float(float& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_short(short& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_long(long& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_ushort(unsigned short& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_ulong(unsigned long& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_uchar(unsigned char& buf, int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_schar(signed char& buf, int count, int root);
+
+// MPI_Bcast array 
+extern "C" MpiLIBRARY_API int mpi_bcast_double_array(double buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_int_array(int buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_char_array(char buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_float_array(float buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_short_array(short buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_long_array(long buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_uchar_array(unsigned char buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_schar_array(signed char buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_ushort_array(unsigned short buf[], int count, int root);
+extern "C" MpiLIBRARY_API int mpi_bcast_ulong_array(unsigned long buf[], int count, int root);
+
+#pragma endregion
+
 
 // Call a function with two integers
 typedef int(*TwoIntReduceDelegate)(int a, int b);

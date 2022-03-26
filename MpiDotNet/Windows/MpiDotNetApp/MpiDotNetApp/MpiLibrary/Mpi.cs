@@ -11,7 +11,122 @@ namespace MpiLibrary
     // Inherit from an abstract class
     public sealed class Mpi : IDisposable
     {
-        public struct MPI_Status {
+        // NOTE: enums were made based off the info in the mpi.h
+        // this information may be different using different versions
+        // of mpi.h across different platforms please make sure 
+        // you check and make sure these enums match the values in your
+        // mpi.h file
+        public enum MPI_Op : int
+        {
+            MPI_OP_NULL = 0x18000000,
+            MPI_MAX     = 0x58000001,
+            MPI_MIN     = 0x58000002,
+            MPI_SUM     = 0x58000003,
+            MPI_PROD    = 0x58000004,
+            MPI_LAND    = 0x58000005,
+            MPI_BAND    = 0x58000006,
+            MPI_LOR     = 0x58000007,
+            MPI_BOR     = 0x58000008,
+            MPI_LXOR    = 0x58000009,
+            MPI_BXOR    = 0x5800000a,
+            MPI_MINLOC  = 0x5800000b,
+            MPI_MAXLOC  = 0x5800000c,
+            MPI_REPLACE = 0x5800000d,
+            MPI_NO_OP   = 0x5800000e
+        }
+        public enum MPI_Datatype : uint
+        {
+        MPI_DATATYPE_NULL           = 0x0c000000,
+
+        MPI_CHAR                    = 0x4c000101,
+        MPI_UNSIGNED_CHAR           = 0x4c000102,
+        MPI_SHORT                   = 0x4c000203,
+        MPI_UNSIGNED_SHORT          = 0x4c000204,
+        MPI_INT                     = 0x4c000405,
+        MPI_UNSIGNED                = 0x4c000406,
+        MPI_LONG                    = 0x4c000407,
+        MPI_UNSIGNED_LONG           = 0x4c000408,
+        MPI_LONG_LONG_INT           = 0x4c000809,
+        MPI_LONG_LONG               = MPI_LONG_LONG_INT,
+        MPI_FLOAT                   = 0x4c00040a,
+        MPI_DOUBLE                  = 0x4c00080b,
+        MPI_LONG_DOUBLE             = 0x4c00080c,
+        MPI_BYTE                    = 0x4c00010d,
+        MPI_WCHAR                   = 0x4c00020e,
+
+        MPI_PACKED                  = 0x4c00010f,
+        MPI_LB                      = 0x4c000010,
+        MPI_UB                      = 0x4c000011,
+
+        MPI_C_COMPLEX               = 0x4c000812,
+        MPI_C_FLOAT_COMPLEX         = 0x4c000813,
+        MPI_C_DOUBLE_COMPLEX        = 0x4c001014,
+        MPI_C_LONG_DOUBLE_COMPLEX   = 0x4c001015,
+ 
+        MPI_2INT                    = 0x4c000816,
+        MPI_C_BOOL                  = 0x4c000117,
+        MPI_SIGNED_CHAR             = 0x4c000118,
+        MPI_UNSIGNED_LONG_LONG      = 0x4c000819,
+
+                /* Fortran types */
+        MPI_CHARACTER               = 0x4c00011a,
+        MPI_INTEGER                 = 0x4c00041b,
+        MPI_REAL                    = 0x4c00041c,
+        MPI_LOGICAL                 = 0x4c00041d,
+        MPI_COMPLEX                 = 0x4c00081e,
+        MPI_DOUBLE_PRECISION        = 0x4c00081f,
+        MPI_2INTEGER                = 0x4c000820,
+        MPI_2REAL                   = 0x4c000821,
+        MPI_DOUBLE_COMPLEX          = 0x4c001022,
+        MPI_2DOUBLE_PRECISION       = 0x4c001023,
+        MPI_2COMPLEX                = 0x4c001024,
+        MPI_2DOUBLE_COMPLEX         = 0x4c002025,
+
+                /* Size-specific types (see MPI 2.2, 16.2.5, */
+        MPI_REAL2                   = MPI_DATATYPE_NULL,
+        MPI_REAL4                   = 0x4c000427,
+        MPI_COMPLEX8                = 0x4c000828,
+        MPI_REAL8                   = 0x4c000829,
+        MPI_COMPLEX16               = 0x4c00102a,
+        MPI_REAL16                  = MPI_DATATYPE_NULL,
+        MPI_COMPLEX32               = MPI_DATATYPE_NULL,
+        MPI_INTEGER1                = 0x4c00012d,
+        MPI_COMPLEX4                = MPI_DATATYPE_NULL,
+        MPI_INTEGER2                = 0x4c00022f,
+        MPI_INTEGER4                = 0x4c000430,
+        MPI_INTEGER8                = 0x4c000831,
+        MPI_INTEGER16               = MPI_DATATYPE_NULL,
+        MPI_INT8_T                  = 0x4c000133,
+        MPI_INT16_T                 = 0x4c000234,
+        MPI_INT32_T                 = 0x4c000435,
+        MPI_INT64_T                 = 0x4c000836,
+        MPI_UINT8_T                 = 0x4c000137,
+        MPI_UINT16_T                = 0x4c000238,
+        MPI_UINT32_T                = 0x4c000439,
+        MPI_UINT64_T                = 0x4c00083a,
+
+        # if _WIN64
+            MPI_AINT                    = 0x4c00083b,
+        #else
+            MPI_AINT                    = 0x4c00043b,
+        #endif
+        MPI_OFFSET                  = 0x4c00083c,
+        MPI_COUNT                   = 0x4c00083d,
+
+        /*
+            * The layouts for the types MPI_DOUBLE_INT etc. are
+            *
+            *      struct { double a; int b; }
+            */
+        MPI_FLOAT_INT               = 0x8c000000,
+        MPI_DOUBLE_INT              = 0x8c000001,
+        MPI_LONG_INT                = 0x8c000002,
+        MPI_SHORT_INT               = 0x8c000003,
+        MPI_LONG_DOUBLE_INT         = 0x8c000004
+    }
+
+    public struct MPI_Status
+        {
             public int count_lo;
             public int count_hi_and_cancelled;
             public int MPI_SOURCE;
@@ -21,138 +136,11 @@ namespace MpiLibrary
             public override string ToString()
             {
                 return $"Mpi_Status:\n\tcount_lo: {count_lo} \n\t count_hi_and_cancelled: {count_hi_and_cancelled} \n\tsource: {MPI_SOURCE} \n\t"
-                +$"tag: {MPI_TAG} \n\terror: {MPI_ERROR}";
+                + $"tag: {MPI_TAG} \n\terror: {MPI_ERROR}";
             }
         }
-        public enum MPI_Datatype : uint{
-            //Null datatype
-            MPI_DATATYPE_NULL          = 0x0c000000,
-            //Char
-            MPI_CHAR                   = 0x4c000101,
-            //uchar
-            MPI_UNSIGNED_CHAR          = 0x4c000102,
-            //short
-            MPI_SHORT                  = 0x4c000203,
-            //ushort
-            MPI_UNSIGNED_SHORT         = 0x4c000204,
-            // int
-            MPI_INT                    = 0x4c000405,
-            //uint
-            MPI_UNSIGNED               = 0x4c000406,
-            //long
-            MPI_LONG                   = 0x4c000407,
-            //ulong
-            MPI_UNSIGNED_LONG          = 0x4c000408,
-            //long long (some systems may not implement)
-            //The following are datatypes for the MPI functions MPI_MAXLOC and MPI_MINLOC . 
-            MPI_LONG_LONG_INT          = 0x4c000809,
-            // same as MPI_LONG_LONG_INT
-            MPI_LONG_LONG              = MPI_LONG_LONG_INT,
-            //float
-            MPI_FLOAT                  = 0x4c00040a,
-            //double
-            MPI_DOUBLE                 = 0x4c00080b,
-            //long double (some systems may not implement)
-            MPI_LONG_DOUBLE            = 0x4c00080c,
-            // See standard; like unsigned char 
-            MPI_BYTE                   = 0x4c00010d,
-            //  is an MPI_Datatype that represents a wide character type in MPI, it corresponds to a wchar_t in C
-            MPI_WCHAR                  = 0x4c00020e,
-            //For MPI_Pack and MPI_Unpack lookup for more information
-            MPI_PACKED                 = 0x4c00010f,
-            //For MPI_Type_struct ; a lower-bound indicator
-            MPI_LB                     = 0x4c000010,
-            //For MPI_Type_struct ; a upper-bound indicator
-            MPI_UB                     = 0x4c000011,
-            //is an MPI_Datatype that represents a complex type in MPI, it corresponds to a float _Complex in C
-            MPI_C_COMPLEX              = 0x4c000812,
-            //An MPI_Datatype that represents a floating complex type in MPI, it corresponds to a float _Complex in C.
-            MPI_C_FLOAT_COMPLEX        = 0x4c000813,
-            //An MPI_Datatype that represents a double precision floating complex type in MPI, it corresponds to a float _Complex in C
-            MPI_C_DOUBLE_COMPLEX       = 0x4c001614,
-            //An MPI_Datatype that represents a long double precision floating complex type in MPI, it corresponds to a long double _Complex in C
-            MPI_C_LONG_DOUBLE_COMPLEX  = 0x4c001615,
-            // struct { int, int } 
-            MPI_2INT                   = 0x4c000816,
-            //is an MPI_Datatype that represents a boolean type in MPI, it corresponds to a bool in C. For the FORTRAN counterpart, please see MPI_LOGICAL.
-            MPI_C_BOOL                 = 0x4c000117,
-            //MPI_SIGNED_CHAR is an MPI_Datatype that represents a signed character type in MPI, it corresponds to a signed char in C. The difference
-            // with MPI_CHAR is that the latter is treated as the printable character, while MPI_SIGNED_CHAR is treated as the integral value. 
-            //This is why MPI_CHAR cannot be used in reduction operations for instance while MPI_SIGNED_CHAR can.
-            MPI_SIGNED_CHAR            = 0x4c000118,
-            //MPI_UNSIGNED_LONG_LONG is an MPI_Datatype that represents an unsigned long long integer type in MPI,
-            // it corresponds to an unsigned long long int in C.
-            MPI_UNSIGNED_LONG_LONG     = 0x4c000819,
-            //MPI_CHARACTER is an MPI_Datatype that represents a character type in MPI, it corresponds to a CHARACTER in FORTRAN.
-            MPI_CHARACTER              = 0x4c00011a,
-            //MPI_INTEGER is an MPI_Datatype that represents an integer type in MPI, it corresponds to an INTEGER in FORTRAN. 
-            //For the C counterpart, please see MPI_INT.
-            MPI_INTEGER                = 0x4c00041b,
-            //Fortran REAL
-            MPI_REAL                   = 0x4c00041c,
-            //Fortran LOGICAL
-            MPI_LOGICAL                = 0x4c00041d,
-            //Fortran COMPLEX
-            MPI_COMPLEX                = 0x4c00081e,
-            //Fortran DOUBLE_PERCISION 
-            MPI_DOUBLE_PRECISION       = 0x4c00081f,
+    
 
-            MPI_2INTEGER               = 0x4c000820,
-            MPI_2REAL                  = 0x4c000821,
-            MPI_DOUBLE_COMPLEX         = 0x4c001022,
-            MPI_2DOUBLE_PRECISION      = 0x4c001023,
-            MPI_2COMPLEX               = 0x4c001024,
-            MPI_2DOUBLE_COMPLEX        = 0x4c002025,
-            MPI_REAL2                  = MPI_DATATYPE_NULL,
-            MPI_REAL4                  = 0x4c000427,
-            MPI_COMPLEX8               = 0x4c000828,
-            MPI_REAL8                  = 0x4c000829,
-            MPI_COMPLEX16              = 0x4c00102a,
-            MPI_REAL16                 = MPI_DATATYPE_NULL,
-            MPI_COMPLEX32              = MPI_DATATYPE_NULL,
-            MPI_INTEGER1               = 0x4c00012d,
-            MPI_COMPLEX4               = MPI_DATATYPE_NULL,
-            MPI_INTEGER2               = 0x4c00022f,
-            MPI_INTEGER4               = 0x4c000430,
-            MPI_INTEGER8               = 0x4c000831,
-            MPI_INTEGER16              = MPI_DATATYPE_NULL,
-            //MPI_INT8_T is an MPI_Datatype that represents a 1-byte integer type in MPI, it corresponds to an int8_t in C. For the FORTRAN counterpart, please see MPI_INTEGER1.
-             MPI_INT8_T                 = 0x4c000133,
-            //MPI_INT16_T is an MPI_Datatype that represents a 2-byte integer type in MPI, it corresponds to an int16_t in C. For the FORTRAN counterpart, please see MPI_INTEGER2.
-            MPI_INT16_T                = 0x4c000234,
-            //MPI_INT32_T is an MPI_Datatype that represents a 4-byte integer type in MPI, it corresponds to an int32_t in C. For the FORTRAN counterpart, please see MPI_INTEGER4.
-            MPI_INT32_T                = 0x4c000435,
-            //MPI_INT64_T is an MPI_Datatype that represents an 8-byte integer type in MPI, it corresponds to an int64_t in C. For the FORTRAN counterpart, please see MPI_INTEGER8.
-            MPI_INT64_T                = 0x4c000836,
-            //MPI_UINT8_T is an MPI_Datatype that represents an unsigned 1-byte integer type in MPI, it corresponds to an uint8_t in C.
-            MPI_UINT8_T                = 0x4c000137,
-            //MPI_UINT16_T is an MPI_Datatype that represents an unsigned 2-byte integer type in MPI, it corresponds to an uint16_t in C.
-            MPI_UINT16_T               = 0x4c000238,
-            //MPI_UINT32_T is an MPI_Datatype that represents an unsigned 4-byte integer type in MPI, it corresponds to an uint32_t in C.
-            MPI_UINT32_T               = 0x4c000439,
-            //MPI_UINT64_T is an MPI_Datatype that represents an unsigned 8-byte integer type in MPI, it corresponds to an uint64_t in C.
-            MPI_UINT64_T               = 0x4c00083a,
-            // In C, MPI_Aint and MPI_AINT are distinct:
-            //MPI_Aint is the type of a variable able to contain a memory address. It is used in heterogeneous datatype creation routines 
-            //for instance, such as MPI_Type_create_hindexed, MPI_Type_create_hindexed_block, MPI_Type_create_hvector and MPI_Type_create_struct. 
-            //Please see MPI_ADDRESS_KIND for the FORTRAN counterpart.
-            //MPI_AINT is an MPI_Datatype used to inform MPI about the type of a variable passed to a routine. Similar to MPI_INT being the M
-            //PI_Datatype corresponding to an int, MPI_AINT is the MPI_Datatype corresponding to an MPI_Aint.
-            MPI_AINT                   = 0x4c00083b,
-            MPI_AINT_WIN64             = 0x4c00043b,
-            //is an integer type of size sufficient to represent the size (in bytes) of the largest file supported by MPI.
-            MPI_OFFSET                 = 0x4c00083c,
-            //struct {float,int}
-            MPI_FLOAT_INT              = 0x8c000000,
-            //struct {doubl.int}
-            MPI_DOUBLE_INT             = 0x8c000001,
-            //struct {long,int}
-            MPI_LONG_INT               = 0x8c000002,
-            //struct {short,int}
-            MPI_SHORT_INT              = 0x8c000003,
-            //struct {long,double,int} 
-            MPI_LONG_DOUBLE_INT        = 0x8c000004
-        }
         // The name of the MPI Library to load
         private const string MPI_LIBRARY = "MpiLibrary.dll";
 
@@ -167,26 +155,43 @@ namespace MpiLibrary
         private const int RTLD_GLOBAL = 0x00100; //Make symbols available to libraries loaded later
         [DllImport("dl")]
         private static extern IntPtr dlopen(string file, int mode);
-
-        // Native implementation of initialize_mpi() for Linux
+        #region GENERAL_FUNCTIONS_IMPORTS
+        // Native implementation of initialize_mpi()
         [DllImport(MPI_LIBRARY)]
         private static extern int initialize_mpi(int argc, string[] argv);
 
-        // Native implementation of finalize_mpi() for Linux
+        // Native implementation of finalize_mpi() 
         [DllImport(MPI_LIBRARY)]
         private static extern int finalize_mpi();
 
-        // Native implementation of get_world_size() for Linux
+        // Native implementation of get_world_size()
         [DllImport(MPI_LIBRARY)]
-        private static extern int get_world_size();
+        private static extern int get_world_size__ws();
 
-        // Native implementation of get_world_rank() for Linux
         [DllImport(MPI_LIBRARY)]
-        private static extern int get_world_rank();
+        private static extern int get_world_size__w(ref int size);
 
-        // Native implementation of AllReduce(int, int, ...) for Linux
         [DllImport(MPI_LIBRARY)]
-        private static extern int all_reduce_int(int i, ref int j);
+        private static extern int get_world_size(int comm,ref int size);
+
+        // Native implementation of get_world_rank() 
+        [DllImport(MPI_LIBRARY)]
+        private static extern int get_world_rank__wr();
+        
+        [DllImport(MPI_LIBRARY)]
+        private static extern int get_world_rank__w(ref int rank);
+        
+        [DllImport(MPI_LIBRARY)]
+        private static extern int get_world_rank(int comm,ref int rank);
+
+        // Native implementation of AllReduce(int, int, ...)
+        [DllImport(MPI_LIBRARY)]
+        private static extern int all_reduce_int__oc(int i, ref int j);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int all_reduce_int(int i, ref int j,int operation,int comm);
+
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_reduce_int(ref int send,ref int recv, int count, int operation, int root, int comm);
 
         // Native implementation of AllReduce(float[], float[], ...) for Linux
         [DllImport(MPI_LIBRARY)]
@@ -218,52 +223,118 @@ namespace MpiLibrary
 
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_barrier();
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_comm_group(ref int group);
 
-    #region MPI_SEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_double(double buf, int count, int dest, int tag);
+        private static extern int mpi_group_incl(int group, int n, int[] ranks,ref int new_group);
+
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_int(int buf, int count, int dest, int tag);
+        private static extern int mpi_comm_create(int comm, int group, ref int new_comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_char(char buf, int count, int dest, int tag);
+        private static extern int mpi_comm_create__w( int group, ref int new_comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_float(float buf, int count, int dest, int tag);
+        /// <summary>
+        /// Reduces values on all processes to a single value 
+        /// </summary>
+        /// <param name="send">address of send buffer (choice) </param>
+        /// <param name="recv">address of receive buffer (choice, significant only at root) </param>
+        /// <param name="count">number of elements in send buffer (integer) </param>
+        /// <param name="data_type">expected datatype</param>
+        /// <param name="operation">reduce operation (handle) </param>
+        /// <param name="root">rank of root process (integer) </param>
+        /// <param name="comm">communicator (handle) </param>
+        /// <returns>error code</returns>
+        private static extern int mpi_reduce(ref int send, ref int recv, int count,  int operation, int root, int comm);
+        #endregion
+        #region MPI_SEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_short(short buf, int count, int dest, int tag);
+        private static extern int mpi_send_double_s(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_long(long buf, int count, int dest, int tag);
+        private static extern int mpi_send_int_s(int buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_ushort(ushort buf, int count, int dest, int tag);
+        private static extern int mpi_send_char_s(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_ulong(ulong buf, int count, int dest, int tag);
+        private static extern int mpi_send_float_s(float buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_uchar(byte buf, int count, int dest, int tag);
-            [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_schar(sbyte buf, int count, int dest, int tag);
-    #endregion
-    #region MPI_SEND_ARRAY_IMPORTS
+        private static extern int mpi_send_short_s(short buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_double_array(double[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_long_s(long buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_int_array(int[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_ushort_s(ushort buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_char_array(char[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_ulong_s(ulong buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_float_array(float[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_uchar_s(byte buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_short_array(short[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_schar_s(sbyte buf, int count, int dest, int tag);
+
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_long_array(long[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_double(double buf, int count,  int dest, int tag, int comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_uchar_array(byte[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_int(int buf, int count,  int dest, int tag, int comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_schar_array(sbyte[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_char(char buf, int count,  int dest, int tag, int comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_ushort_array(ushort[] buf, int count, int dest, int tag);
+        private static extern int mpi_send_float(float buf, int count,  int dest, int tag, int comm);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_send_ulong_array(ulong[] buf, int count, int dest, int tag);
-    #endregion
-    #region MPI_SSEND_IMPORTS
+        private static extern int mpi_send_short(short buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_long(long buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ushort(ushort buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ulong(ulong buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_uchar(byte buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_schar(sbyte buf, int count,  int dest, int tag, int comm);
+
+        #endregion
+        #region MPI_SEND_ARRAY_IMPORTS
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_double_array_s(double[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_int_array_s(int[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_char_array_s(char[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_float_array_s(float[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_short_array_s(short[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_long_array_s(long[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_uchar_array_s(byte[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_schar_array_s(sbyte[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ushort_array_s(ushort[] buf, int count, int dest, int tag);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ulong_array_s(ulong[] buf, int count, int dest, int tag);
+     
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_double_array(double[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_int_array(int[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_char_array(char[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_float_array(float[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_short_array(short[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_long_array(long[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_uchar_array(byte[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_schar_array(sbyte[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ushort_array(ushort[] buf, int count,  int dest, int tag, int comm);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_send_ulong_array(ulong[] buf, int count,  int dest, int tag, int comm);
+        #endregion
+        #region MPI_SSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_ssendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -272,18 +343,18 @@ namespace MpiLibrary
         private static extern int mpi_ssendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_ssendf(float buf, int count, int dest, int tag);
-    #endregion
-    #region MPI_BSEND_IMPORTS
+        #endregion
+        #region MPI_BSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_bsendd(double buf, int count, int dest, int tag,ref int mpi_request);
+        private static extern int mpi_bsendd(double buf, int count, int dest, int tag, ref int mpi_request);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_bsendi(int buf, int count, int dest, int tag,ref int mpi_request);
+        private static extern int mpi_bsendi(int buf, int count, int dest, int tag, ref int mpi_request);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_bsendc(char buf, int count, int dest, int tag,ref int mpi_request);
+        private static extern int mpi_bsendc(char buf, int count, int dest, int tag, ref int mpi_request);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_bsendf(float buf, int count, int dest, int tag,ref int mpi_request);
-    #endregion
-    #region MPI_ISEND_IMPORTS
+        private static extern int mpi_bsendf(float buf, int count, int dest, int tag, ref int mpi_request);
+        #endregion
+        #region MPI_ISEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_isendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -292,8 +363,8 @@ namespace MpiLibrary
         private static extern int mpi_isendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_isendf(float buf, int count, int dest, int tag);
-    #endregion
-    #region MPI_RSEND_IMPORTS
+        #endregion
+        #region MPI_RSEND_IMPORTS
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_rsendd(double buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
@@ -302,73 +373,182 @@ namespace MpiLibrary
         private static extern int mpi_rsendc(char buf, int count, int dest, int tag);
         [DllImport(MPI_LIBRARY)]
         private static extern int mpi_rsendf(float buf, int count, int dest, int tag);
-    #endregion
-    #region MPI_Recv
-         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_int(ref int buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        #endregion
+        #region MPI_Recv_IMPORTS
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_char(ref char buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_int_s(ref int buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+           ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_double(ref double buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-         ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_char_s(ref char buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_float(ref float buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_double_s(ref double buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+         ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_short(ref short buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_float_s(ref float buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_long(ref long buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_short_s(ref short buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_ushort(ref ushort buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_ulong(ref ulong buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_long_s(ref long buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_uchar(ref byte buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
+        private static extern int mpi_recv_ushort_s(ref ushort buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
         [DllImport(MPI_LIBRARY)]
-        private static extern int mpi_recv_schar(ref sbyte buf, int count, int source, int tag,ref int status_count,ref int status_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-    #endregion
-    #region MPI_Recv_Array
+        private static extern int mpi_recv_ulong_s(ref ulong buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+           ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_uchar_s(ref byte buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_schar_s(ref sbyte buf, int count, int source, int tag, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
 
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_int_array([Out]int[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-    ref int status_MPI_TAG,ref int status_MPI_ERROR);
-    
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_char_array([Out]char[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_float_array([Out]float[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_double_array([Out]double[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_short_array([Out]short[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_long_array([Out]long[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_uchar_array([Out]byte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_schar_array([Out]sbyte[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_ushort_array([Out]ushort[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-        [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
-        private static extern int mpi_recv_ulong_array([Out]ulong[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
-            ref int status_MPI_TAG,ref int status_MPI_ERROR);
-    #endregion
+
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_int(ref int buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+          ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_char(ref char buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_double(ref double buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+         ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_float(ref float buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_short(ref short buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_long(ref long buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_ushort(ref ushort buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_ulong(ref ulong buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+           ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_uchar(ref byte buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_recv_schar(ref sbyte buf, int count, int source, int tag, int comm, ref int status_count, ref int status_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        #endregion
+        #region MPI_Recv_Array_IMPORTS
+
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_int_array_s([Out] int[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+    ref int status_MPI_TAG, ref int status_MPI_ERROR);
+
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_char_array_s([Out] char[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_float_array_s([Out] float[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_double_array_s([Out] double[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_short_array_s([Out] short[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_long_array_s([Out] long[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_uchar_array_s([Out] byte[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_schar_array_s([Out] sbyte[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ushort_array_s([Out] ushort[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ulong_array_s([Out] ulong[] buf, int count, int source, int tag, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+
+
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_int_array([Out] int[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_char_array([Out] char[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_float_array([Out] float[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_double_array([Out] double[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_short_array([Out] short[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_long_array([Out] long[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_uchar_array([Out] byte[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_schar_array([Out] sbyte[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ushort_array([Out] ushort[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_recv_ulong_array([Out] ulong[] buf, int count, int source, int tag, int comm, ref int status_count_lo, ref int status_count_hi_and_cancelled, ref int status_MPI_SOURCE,
+            ref int status_MPI_TAG, ref int status_MPI_ERROR);
+        #endregion
+        #region MPI_Bcast_IMPORTS
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_double(ref double buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_int(ref int buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_char(ref char buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_float(ref float buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_short(ref short buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_long(ref long buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_ushort(ref ushort buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_ulong(ref ulong buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_uchar(ref byte buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_schar(ref sbyte buf, int count, int root);
+
+        // MPI_Bcast array 
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_double_array([Out]double[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_int_array([Out] int[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_char_array([Out] char[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_float_array([Out] float[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_short_array([Out] short[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_long_array([Out] long[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_uchar_array([Out] byte[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_schar_array([Out] sbyte[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_ushort_array([Out] ushort[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_ulong_array([Out] ulong[] buf, int count, int root);
+        #endregion
         /// <summary>
         /// Initialize the MPI object.
         /// </summary>
@@ -378,7 +558,7 @@ namespace MpiLibrary
         {
             // Pre-load dependencies of the wrapping module; necessary to grab the right _version_
             // libmpi.so.12 is for OpenMPI on Ubuntu16.04; libmpi.so.20 for Ubuntu18.04.
-        //    dlopen("libmpi.so.12", RTLD_LAZY | RTLD_GLOBAL);
+            //    dlopen("libmpi.so.12", RTLD_LAZY | RTLD_GLOBAL);
             InitializeMpi(args);
         }
 
@@ -392,138 +572,217 @@ namespace MpiLibrary
         {
             FinalizeMpi();
         }
-    #region MPI_Send
-        public int MPI_Send(int buf,int count,int dest,int tag){
-            return mpi_send_int(buf,count,dest,tag);
+        #region MPI_Send
+        public int MPI_Send(int buf, int count, int dest, int tag)
+        {
+            return mpi_send_int_s(buf, count, dest, tag);
         }
-        public int MPI_Send(double buf,int count,int dest,int tag){
-            return mpi_send_double(buf,count,dest,tag);
+        public int MPI_Send(double buf, int count, int dest, int tag)
+        {
+            return mpi_send_double_s(buf, count, dest, tag);
         }
-        public int MPI_Send(char buf,int count,int dest,int tag){
-            return mpi_send_char(buf,count,dest,tag);
+        public int MPI_Send(char buf, int count, int dest, int tag)
+        {
+            return mpi_send_char_s(buf, count, dest, tag);
         }
-        public int MPI_Send(float buf,int count,int dest,int tag){
-            return mpi_send_float(buf,count,dest,tag);
+        public int MPI_Send(float buf, int count, int dest, int tag)
+        {
+            return mpi_send_float_s(buf, count, dest, tag);
         }
-        public int MPI_Send(long buf,int count,int dest,int tag){
-            return mpi_send_long(buf,count,dest,tag);
+        public int MPI_Send(long buf, int count, int dest, int tag)
+        {
+            return mpi_send_long_s(buf, count, dest, tag);
         }
-        public int MPI_Send(short buf,int count,int dest,int tag){
-            return mpi_send_short(buf,count,dest,tag);
+        public int MPI_Send(short buf, int count, int dest, int tag)
+        {
+            return mpi_send_short_s(buf, count, dest, tag);
         }
-        public int MPI_Send(byte buf,int count,int dest,int tag){
-            return mpi_send_uchar(buf,count,dest,tag);
+        public int MPI_Send(byte buf, int count, int dest, int tag)
+        {
+            return mpi_send_uchar_s(buf, count, dest, tag);
         }
-        public int MPI_Send(sbyte buf,int count,int dest,int tag){
-            return mpi_send_schar(buf,count,dest,tag);
+        public int MPI_Send(sbyte buf, int count, int dest, int tag)
+        {
+            return mpi_send_schar_s(buf, count, dest, tag);
         }
-        public int MPI_Send(ushort buf,int count,int dest,int tag){
-            return mpi_send_ushort(buf,count,dest,tag);
+        public int MPI_Send(ushort buf, int count, int dest, int tag)
+        {
+            return mpi_send_ushort_s(buf, count, dest, tag);
         }
-        public int MPI_Send(ulong buf,int count,int dest,int tag){
-            return mpi_send_ulong(buf,count,dest,tag);
+        public int MPI_Send(ulong buf, int count, int dest, int tag)
+        {
+            return mpi_send_ulong_s(buf, count, dest, tag);
         }
-    #endregion
-    #region MPI_Send_Array
-         public int MPI_Send(int[] buf,int count,int dest,int tag){
-            return mpi_send_int_array(buf,count,dest,tag);
+        public int MPI_Send(int buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_int(buf, count, dest, tag,comm);
+        } 
+        public int MPI_Send(double buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_double(buf, count, dest, tag,comm);
+        } 
+        public int MPI_Send(char buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_char(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(float buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_float(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(long buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_long(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(short buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_short(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(byte buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_uchar(buf, count, dest, tag,comm);
+        } 
+        public int MPI_Send(sbyte buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_schar(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(ulong buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_ulong(buf, count, dest, tag,comm);
+        }  
+        public int MPI_Send(ushort buf, int count, int dest, int tag,int comm)
+        {
+            return mpi_send_ushort(buf, count, dest, tag,comm);
+        }  
+     
+        #endregion
+        #region MPI_Send_Array
+        public int MPI_Send(int[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_int_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(double[] buf,int count,int dest,int tag){
-            return mpi_send_double_array(buf,count,dest,tag);
+        public int MPI_Send(double[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_double_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(char[] buf,int count,int dest,int tag){
-            return mpi_send_char_array(buf,count,dest,tag);
+        public int MPI_Send(char[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_char_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(float[] buf,int count,int dest,int tag){
-            return mpi_send_float_array(buf,count,dest,tag);
+        public int MPI_Send(float[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_float_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(long[] buf,int count,int dest,int tag){
-            return mpi_send_long_array(buf,count,dest,tag);
+        public int MPI_Send(long[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_long_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(short[] buf,int count,int dest,int tag){
-            return mpi_send_short_array(buf,count,dest,tag);
+        public int MPI_Send(short[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_short_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(byte[] buf,int count,int dest,int tag){
-            return mpi_send_uchar_array(buf,count,dest,tag);
+        public int MPI_Send(byte[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_uchar_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(sbyte[] buf,int count,int dest,int tag){
-            return mpi_send_schar_array(buf,count,dest,tag);
+        public int MPI_Send(sbyte[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_schar_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(ushort[] buf,int count,int dest,int tag){
-            return mpi_send_ushort_array(buf,count,dest,tag);
+        public int MPI_Send(ushort[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_ushort_array_s(buf, count, dest, tag);
         }
-        public int MPI_Send(ulong[] buf,int count,int dest,int tag){
-            return mpi_send_ulong_array(buf,count,dest,tag);
+        public int MPI_Send(ulong[] buf, int count, int dest, int tag)
+        {
+            return mpi_send_ulong_array_s(buf, count, dest, tag);
         }
-    #endregion
-    #region MPI_Ssend
-        public int MPI_Ssend(int buf,int count,int dest,int tag){
-            return mpi_ssendi(buf,count,dest,tag);
+        #endregion
+        #region MPI_Ssend
+        public int MPI_Ssend(int buf, int count, int dest, int tag)
+        {
+            return mpi_ssendi(buf, count, dest, tag);
         }
-        public int MPI_Ssend(double buf,int count,int dest,int tag){
-            return mpi_ssendd(buf,count,dest,tag);
+        public int MPI_Ssend(double buf, int count, int dest, int tag)
+        {
+            return mpi_ssendd(buf, count, dest, tag);
         }
-        public int MPI_Ssend(char buf,int count,int dest,int tag){
-            return mpi_ssendc(buf,count,dest,tag);
+        public int MPI_Ssend(char buf, int count, int dest, int tag)
+        {
+            return mpi_ssendc(buf, count, dest, tag);
         }
-        public int MPI_Ssend(float buf,int count,int dest,int tag){
-            return mpi_ssendf(buf,count,dest,tag);
+        public int MPI_Ssend(float buf, int count, int dest, int tag)
+        {
+            return mpi_ssendf(buf, count, dest, tag);
         }
-    #endregion
-    #region MPI_ISend  
-        public int MPI_ISend(int buf,int count,int dest,int tag){
-            return mpi_isendi(buf,count,dest,tag);
+        #endregion
+        #region MPI_ISend  
+        public int MPI_ISend(int buf, int count, int dest, int tag)
+        {
+            return mpi_isendi(buf, count, dest, tag);
         }
-        public int MPI_ISend(double buf,int count,int dest,int tag){
-            return mpi_isendd(buf,count,dest,tag);
+        public int MPI_ISend(double buf, int count, int dest, int tag)
+        {
+            return mpi_isendd(buf, count, dest, tag);
         }
-        public int MPI_ISend(char buf,int count,int dest,int tag){
-            return mpi_isendc(buf,count,dest,tag);
+        public int MPI_ISend(char buf, int count, int dest, int tag)
+        {
+            return mpi_isendc(buf, count, dest, tag);
         }
-        public int MPI_ISend(float buf,int count,int dest,int tag){
-            return mpi_isendf(buf,count,dest,tag);
+        public int MPI_ISend(float buf, int count, int dest, int tag)
+        {
+            return mpi_isendf(buf, count, dest, tag);
         }
-    #endregion
-    #region MPI_RSend
-         public int MPI_RSend(int buf,int count,int dest,int tag){
-            return mpi_rsendi(buf,count,dest,tag);
+        #endregion
+        #region MPI_RSend
+        public int MPI_RSend(int buf, int count, int dest, int tag)
+        {
+            return mpi_rsendi(buf, count, dest, tag);
         }
-        public int MPI_RSend(double buf,int count,int dest,int tag){
-            return mpi_rsendd(buf,count,dest,tag);
+        public int MPI_RSend(double buf, int count, int dest, int tag)
+        {
+            return mpi_rsendd(buf, count, dest, tag);
         }
-        public int MPI_RSend(char buf,int count,int dest,int tag){
-            return mpi_rsendc(buf,count,dest,tag);
+        public int MPI_RSend(char buf, int count, int dest, int tag)
+        {
+            return mpi_rsendc(buf, count, dest, tag);
         }
-        public int MPI_RSend(float buf,int count,int dest,int tag){
-            return mpi_rsendf(buf,count,dest,tag);
+        public int MPI_RSend(float buf, int count, int dest, int tag)
+        {
+            return mpi_rsendf(buf, count, dest, tag);
         }
-    #endregion
-    #region MPI_BSend
-         public int MPI_BSend(int buf,int count,int dest,int tag,ref int mpi_request){
-            return mpi_bsendi(buf,count,dest,tag,ref mpi_request);
+        #endregion
+        #region MPI_BSend
+        public int MPI_BSend(int buf, int count, int dest, int tag, ref int mpi_request)
+        {
+            return mpi_bsendi(buf, count, dest, tag, ref mpi_request);
         }
-        public int MPI_BSend(double buf,int count,int dest,int tag,ref int mpi_request){
-            return mpi_bsendd(buf,count,dest,tag,ref mpi_request);
+        public int MPI_BSend(double buf, int count, int dest, int tag, ref int mpi_request)
+        {
+            return mpi_bsendd(buf, count, dest, tag, ref mpi_request);
         }
-        public int MPI_BSend(char buf,int count,int dest,int tag,ref int mpi_request){
-            return mpi_bsendc(buf,count,dest,tag,ref mpi_request);
+        public int MPI_BSend(char buf, int count, int dest, int tag, ref int mpi_request)
+        {
+            return mpi_bsendc(buf, count, dest, tag, ref mpi_request);
         }
-        public int MPI_BSend(float buf,int count,int dest,int tag,ref int mpi_request){
-            return mpi_bsendf(buf,count,dest,tag,ref mpi_request);
+        public int MPI_BSend(float buf, int count, int dest, int tag, ref int mpi_request)
+        {
+            return mpi_bsendf(buf, count, dest, tag, ref mpi_request);
         }
-    #endregion
-    #region MPI_Recv
-       
-        public int MPI_Recv(ref int buf, int count, int source, int tag,out MPI_Status status){
+        #endregion
+        #region MPI_Recv
+
+        public int MPI_Recv(ref int buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_int(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_int_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -532,16 +791,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref char buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref char buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_char(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_char_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -550,16 +811,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref float buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref float buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_float(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_float_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -568,16 +831,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref double buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref double buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_double(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_double_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -586,16 +851,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref short buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref short buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_short(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_short_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -604,16 +871,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref long buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref long buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_long(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_long_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -622,16 +891,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref byte buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref byte buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_uchar(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_uchar_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -640,16 +911,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref sbyte buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref sbyte buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_schar(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_schar_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -658,16 +931,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref ushort buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref ushort buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_ushort(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_ushort_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -676,16 +951,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref ulong buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref ulong buf, int count, int source, int tag, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_ulong(ref buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_ulong_s(ref buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -694,18 +971,21 @@ namespace MpiLibrary
             };
             return response;
         }
-    #endregion
-    #region MPI_Recv_Array
-        public int MPI_Recv(ref int[] buf, int count, int source, int tag,out MPI_Status status){
+
+
+
+        public int MPI_Recv(ref int buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_int_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_int(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -714,16 +994,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref char[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref char buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_char_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-            status = new MPI_Status{
+            int response = mpi_recv_char(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -732,17 +1014,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref long[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref float buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_long_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_float(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -751,17 +1034,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref float[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref double buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_float_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_double(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -770,17 +1054,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref sbyte[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref short buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_schar_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_short(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -789,17 +1074,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref short[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref long buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_short_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_long(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -808,17 +1094,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref byte[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref byte buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_uchar_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_uchar(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -827,17 +1114,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref ulong[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref sbyte buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_ulong_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_schar(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -846,17 +1134,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref double[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref ushort buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_double_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_ushort(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -865,17 +1154,18 @@ namespace MpiLibrary
             };
             return response;
         }
-        public int MPI_Recv(ref ushort[] buf, int count, int source, int tag,out MPI_Status status){
+        public int MPI_Recv(ref ulong buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
 
             int status_count_lo = -1;
             int status_count_hi_and_cancelled = -1;
-            int status_MPI_SOURCE = -1; 
+            int status_MPI_SOURCE = -1;
             int status_MPI_TAG = -1;
             int status_MPI_ERROR = -1;
-            int response = mpi_recv_ushort_array(buf,count,source,tag,ref status_count_lo,ref status_count_hi_and_cancelled,ref status_MPI_SOURCE,
-            ref status_MPI_TAG,ref status_MPI_ERROR);
-
-            status = new MPI_Status{
+            int response = mpi_recv_ulong(ref buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
                 count_lo = status_count_lo,
                 count_hi_and_cancelled = status_count_hi_and_cancelled,
                 MPI_SOURCE = status_MPI_SOURCE,
@@ -884,13 +1174,563 @@ namespace MpiLibrary
             };
             return response;
         }
-    #endregion
+        #endregion
+        #region MPI_Recv_Array
+        public int MPI_Recv(ref int[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_int_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref char[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_char_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref long[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_long_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref float[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_float_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref sbyte[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_schar_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref short[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_short_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref byte[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_uchar_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref ulong[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_ulong_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref double[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_double_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref ushort[] buf, int count, int source, int tag, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_ushort_array_s(buf, count, source, tag, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+
+
+        public int MPI_Recv(ref int[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_int_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref char[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_char_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref long[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_long_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref float[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_float_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref sbyte[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_schar_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref short[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_short_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref byte[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_uchar_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref ulong[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_ulong_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref double[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_double_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        public int MPI_Recv(ref ushort[] buf, int count, int source, int tag, int comm, out MPI_Status status)
+        {
+
+            int status_count_lo = -1;
+            int status_count_hi_and_cancelled = -1;
+            int status_MPI_SOURCE = -1;
+            int status_MPI_TAG = -1;
+            int status_MPI_ERROR = -1;
+            int response = mpi_recv_ushort_array(buf, count, source, tag, comm, ref status_count_lo, ref status_count_hi_and_cancelled, ref status_MPI_SOURCE,
+            ref status_MPI_TAG, ref status_MPI_ERROR);
+
+            status = new MPI_Status
+            {
+                count_lo = status_count_lo,
+                count_hi_and_cancelled = status_count_hi_and_cancelled,
+                MPI_SOURCE = status_MPI_SOURCE,
+                MPI_ERROR = status_MPI_ERROR,
+                MPI_TAG = status_MPI_TAG
+            };
+            return response;
+        }
+        #endregion
+        #region MPI_Bcast
+        public int MPI_Bcast(ref char buf, int count, int root)
+        {
+            return mpi_bcast_char(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref int buf, int count, int root)
+        {
+            return mpi_bcast_int(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref float buf, int count, int root)
+        {
+            return mpi_bcast_float(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref double buf, int count, int root)
+        {
+            return mpi_bcast_double(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref short buf, int count, int root)
+        {
+            return mpi_bcast_short(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref long buf, int count, int root)
+        {
+            return mpi_bcast_long(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref ulong buf, int count, int root)
+        {
+            return mpi_bcast_ulong(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref byte buf, int count, int root)
+        {
+            return mpi_bcast_uchar(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref sbyte buf, int count, int root)
+        {
+            return mpi_bcast_schar(ref buf, count , root);
+        }
+        public int MPI_Bcast(ref ushort buf, int count, int root)
+        {
+            return mpi_bcast_ushort(ref buf, count , root);
+        }
+        // arrays
+        public int MPI_Bcast(ref char[] buf, int count, int root)
+        {
+            return mpi_bcast_char_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref int[] buf, int count, int root)
+        {
+            return mpi_bcast_int_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref float[] buf, int count, int root)
+        {
+            return mpi_bcast_float_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref double[] buf, int count, int root)
+        {
+            return mpi_bcast_double_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref short[] buf, int count, int root)
+        {
+            return mpi_bcast_short_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref long[] buf, int count, int root)
+        {
+            return mpi_bcast_long_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref ulong[] buf, int count, int root)
+        {
+            return mpi_bcast_ulong_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref byte[] buf, int count, int root)
+        {
+            return mpi_bcast_uchar_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref sbyte[] buf, int count, int root)
+        {
+            return mpi_bcast_schar_array(buf, count , root);
+        }
+        public int MPI_Bcast(ref ushort[] buf, int count, int root)
+        {
+            return mpi_bcast_ushort_array(buf, count , root);
+        }
+        #endregion
+        #region General_Functions
+        /// <summary>
+        /// Creates a new communicator 
+        /// </summary>
+        /// <param name="comm">communicator (handle) </param>
+        /// <param name="group">group, which is a subset of the group of comm (handle) </param>
+        /// <param name="new_comm">new communicator (handle) </param>
+        /// <returns>error code</returns>
+        public int MPI_Comm_create(int comm, int group,ref int new_comm)
+        {
+            return mpi_comm_create(comm, group, ref new_comm);
+        }
+        /// <summary>
+        /// Creates a new communicator using MPI_COMM_WORLD as the comm parameter
+        /// </summary>
+        /// <param name="comm">communicator (handle) </param>
+        /// <param name="group">group, which is a subset of the group of comm (handle) </param>
+        /// <param name="new_comm">new communicator (handle) </param>
+        /// <returns>error code</returns>
+        public int MPI_Comm_create__w(int group,ref int new_comm)
+        {
+            return mpi_comm_create__w(group, ref new_comm);
+        }
+        /// <summary>
+        /// Produces a group by reordering an existing group and taking only listed members 
+        /// </summary>
+        /// <param name="group">group id (NOTE: this is treated as a MPI_GROUP)</param>
+        /// <param name="n">number of elements in array ranks (and size of newgroup ) (integer) </param>
+        /// <param name="ranks">ranks of processes in group to appear in newgroup (array of integers) </param>
+        /// <param name="new_group">new group derived from above, in the order defined by ranks (handle) </param>
+        /// <returns>error code</returns>
+        public int MPI_Group_incl(int group, int n,ref int[] ranks, ref int new_group)
+        {
+            return mpi_group_incl(group,n,ranks,ref new_group);
+        }
+        /// <summary>
+        /// Accesses the group associated with given communicator 
+        /// </summary>
+        /// <param name="groupId">id of the group</param>
+        /// <returns>error code</returns>
+        public int MPI_Comm_group(ref int groupId)
+        {
+            return mpi_comm_group(ref groupId);
+        }
+
         //calls the MPI_Wtime() function
-        public double MPI_Wtime(){
+        public double MPI_Wtime()
+        {
             return mpi_wtime();
         }
         //calls the MPI_Barrier() function
-        public int MPI_Barrier(){
+        public int MPI_Barrier()
+        {
             return mpi_barrier();
         }
 
@@ -919,7 +1759,26 @@ namespace MpiLibrary
         /// <returns>The world size.</returns>
         public int GetWorldSize()
         {
-            return get_world_size();
+            return get_world_size__ws();
+        }
+        /// <summary>
+        /// Gets the World Size
+        /// </summary>
+        /// <param name="comm">MPI_Comm id</param>
+        /// <returns>error code</returns>
+        public int GetWorldSize(ref int size)
+        {
+            return get_world_size__w(ref size);
+        }
+        /// <summary>
+        /// Gets the World Size
+        /// </summary>
+        /// <param name="comm">MPI_Comm id</param>
+        /// <param name="size">world size</param>
+        /// <returns>error code</returns>
+        public int GetWorldSize(int comm,ref int size)
+        {
+            return get_world_size(comm,ref size);
         }
 
         /// <summary>
@@ -928,7 +1787,26 @@ namespace MpiLibrary
         /// <returns>The world rank.</returns>
         public int GetWorldRank()
         {
-            return get_world_rank();
+            return get_world_rank__wr();
+        }
+        /// <summary>
+        /// Get the MPI world rank.
+        /// </summary>
+        /// <param name="rank">rank</param>
+        /// <returns>error code</returns>
+        public int GetWorldRank(ref int rank)
+        {
+            return get_world_rank__w(ref rank);
+        }
+        /// <summary>
+        /// Get the MPI world rank.
+        /// </summary>
+        /// <param name="comm">comm handle</param>
+        /// <param name="rank">rank</param>
+        /// <returns>error code</returns>
+        public int GetWorldRank(int comm, ref int rank)
+        {
+            return get_world_rank(comm,ref rank);
         }
 
         /// <summary>
@@ -939,7 +1817,19 @@ namespace MpiLibrary
         /// <returns>The result of the MPI operation.</returns>
         public int AllReduce(int i, ref int j)
         {
-            return all_reduce_int(i, ref j);
+            return all_reduce_int__oc(i, ref j);
+        }
+        /// <summary>
+        /// performs an MPI_ALLreduce with operation MPI_SUM and MPI_World = MPI_COMM_WORLD
+        /// </summary>
+        /// <param name="i">The value in the local process.</param>
+        /// <param name="j">The sum over all the workers.</param>
+        /// <param name="operation">type of operation to execute</param>
+        /// <param name="comm">MPI_Comm to execute this in</param>
+        /// <returns>error code</returns>
+        public int AllReduce(int i, ref int j,MPI_Op opertaion,int comm)
+        {
+            return all_reduce_int(i, ref j,(int)opertaion,comm);
         }
 
         /// <summary>
@@ -958,6 +1848,10 @@ namespace MpiLibrary
             return all_reduce_floatarray(source, dest, source.Length);
         }
 
+        public int MPI_Reduce(ref int send,ref int recv,int count,MPI_Op operation,int root,int comm)
+        {
+            return mpi_reduce_int(ref send,ref recv,count,(int)operation,root,comm);
+        }
         /// <summary>
         /// Return the number 1
         /// </summary>
@@ -1012,7 +1906,7 @@ namespace MpiLibrary
         {
             return external_reduce_with_callback(reduceFunc, array, arraySize);
         }
-
+        #endregion
     }
 
     public static class MpiExtensions {
@@ -1038,6 +1932,8 @@ namespace MpiLibrary
             Console.WriteLine($"{manager.worldRank}::WARNING::{obj}");
         }
     }
+
+    
 
     #region MPI_Manager
     public class MpiManager : IDisposable{

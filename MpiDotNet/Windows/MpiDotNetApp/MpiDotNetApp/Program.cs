@@ -40,17 +40,30 @@ namespace DotNetClient
 
                 Console.WriteLine($"Rank-{worldRank}: bias={biasAndWeights[0]} weight[0]={biasAndWeights[1]} | bias={averageBiasAndWeights[0]} weight[0]={averageBiasAndWeights[1]}");
             }*/
-          //  Test_Suite();
-         //   MPI_COMMUNICATION_TEST();
-            MpiManagerTest();
+            //  Test_Suite();
+            //   MPI_COMMUNICATION_TEST();
+
+            //   MpiManagerTest();
+
+            //MpiDotNetApp.MPI_Tests.Communicator_Test.Run();
+            MpiDotNetApp.MPI_Tests.Heat_MPI a = new MpiDotNetApp.MPI_Tests.Heat_MPI();
+            a.Run();
             Console.WriteLine("Finished!");
         }
         static void MpiManagerTest(){
             MpiManager manager = new MpiManager(new string[]{});
-            
+
+            int value = 55;
             if (manager.worldRank == 0){
-                Console.WriteLine("MpiManager Info:\n"+manager.ToString());
-            
+                //    Console.WriteLine("MpiManager Info:\n"+manager.ToString());
+                MpiManager.mpi.MPI_Bcast(ref value, 1, 0);
+                Console.WriteLine("Send braodcast!");
+            }
+            else
+            {
+                value = -1;
+                MpiManager.mpi.MPI_Bcast(ref value, 1, 0);
+                Console.WriteLine($"Node {manager.worldRank}: got {value} from broadcast");
             }
             manager.Dispose();
         }

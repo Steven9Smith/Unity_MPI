@@ -368,7 +368,52 @@ namespace MpiLibrary
         [DllImport(MPI_LIBRARY,CallingConvention = CallingConvention.Cdecl)]
         private static extern int mpi_recv_ulong_array([Out]ulong[] buf, int count, int source, int tag,ref int status_count_lo,ref int status_count_hi_and_cancelled,ref int status_MPI_SOURCE,
             ref int status_MPI_TAG,ref int status_MPI_ERROR);
-    #endregion
+        #endregion
+
+        #region MPI_Bcast_IMPORTS
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_double(ref double buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_int(ref int buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_char(ref char buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_float(ref float buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_short(ref short buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_long(ref long buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_ushort(ref ushort buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_ulong(ref ulong buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_uchar(ref byte buf, int count, int root);
+        [DllImport(MPI_LIBRARY)]
+        private static extern int mpi_bcast_schar(ref sbyte buf, int count, int root);
+
+        // MPI_Bcast array 
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_double_array([Out] double[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_int_array([Out] int[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_char_array([Out] char[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_float_array([Out] float[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_short_array([Out] short[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_long_array([Out] long[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_uchar_array([Out] byte[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_schar_array([Out] sbyte[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_ushort_array([Out] ushort[] buf, int count, int root);
+        [DllImport(MPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int mpi_bcast_ulong_array([Out] ulong[] buf, int count, int root);
+        #endregion
         /// <summary>
         /// Initialize the MPI object.
         /// </summary>
@@ -884,7 +929,91 @@ namespace MpiLibrary
             };
             return response;
         }
-    #endregion
+        #endregion
+
+        #region MPI_Bcast
+        public int MPI_Bcast(ref char buf, int count, int root)
+        {
+            return mpi_bcast_char(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref int buf, int count, int root)
+        {
+            return mpi_bcast_int(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref float buf, int count, int root)
+        {
+            return mpi_bcast_float(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref double buf, int count, int root)
+        {
+            return mpi_bcast_double(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref short buf, int count, int root)
+        {
+            return mpi_bcast_short(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref long buf, int count, int root)
+        {
+            return mpi_bcast_long(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref ulong buf, int count, int root)
+        {
+            return mpi_bcast_ulong(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref byte buf, int count, int root)
+        {
+            return mpi_bcast_uchar(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref sbyte buf, int count, int root)
+        {
+            return mpi_bcast_schar(ref buf, count, root);
+        }
+        public int MPI_Bcast(ref ushort buf, int count, int root)
+        {
+            return mpi_bcast_ushort(ref buf, count, root);
+        }
+        // arrays
+        public int MPI_Bcast(ref char[] buf, int count, int root)
+        {
+            return mpi_bcast_char_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref int[] buf, int count, int root)
+        {
+            return mpi_bcast_int_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref float[] buf, int count, int root)
+        {
+            return mpi_bcast_float_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref double[] buf, int count, int root)
+        {
+            return mpi_bcast_double_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref short[] buf, int count, int root)
+        {
+            return mpi_bcast_short_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref long[] buf, int count, int root)
+        {
+            return mpi_bcast_long_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref ulong[] buf, int count, int root)
+        {
+            return mpi_bcast_ulong_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref byte[] buf, int count, int root)
+        {
+            return mpi_bcast_uchar_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref sbyte[] buf, int count, int root)
+        {
+            return mpi_bcast_schar_array(buf, count, root);
+        }
+        public int MPI_Bcast(ref ushort[] buf, int count, int root)
+        {
+            return mpi_bcast_ushort_array(buf, count, root);
+        }
+        #endregion
         //calls the MPI_Wtime() function
         public double MPI_Wtime(){
             return mpi_wtime();
