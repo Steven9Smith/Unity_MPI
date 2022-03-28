@@ -1,0 +1,57 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj": {}
+  },
+  "projects": {
+    "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj",
+        "projectName": "MpiDotNetApp",
+        "projectPath": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.1": {
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "target": "Package",
+              "version": "[2.1.0, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}
