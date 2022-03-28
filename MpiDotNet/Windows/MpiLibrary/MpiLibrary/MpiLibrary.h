@@ -5,7 +5,11 @@
 #define MpiLIBRARY_EXPORTS
 #endif
 #pragma once
+#ifdef WINDOWS_BUILD
 #include <mpi.h>
+#else
+#include <mpi/mpi.h>
+#endif
 #ifndef _WINDOWS
 #define __declspec(dllexport)
 #endif

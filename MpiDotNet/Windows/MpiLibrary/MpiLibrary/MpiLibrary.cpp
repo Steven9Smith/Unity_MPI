@@ -1,7 +1,11 @@
 // MpiLibrary.cpp : Defines the exported functions for the DLL.
 #include "stdafx.h"
 #include "MpiLibrary.h"
+#ifdef WINDOWS_BUILD
 #include <mpi.h>
+#else
+#include <mpi/mpi.h>
+#endif
 #include <iostream>
 #pragma region General_Functions
 // Initialize MPI

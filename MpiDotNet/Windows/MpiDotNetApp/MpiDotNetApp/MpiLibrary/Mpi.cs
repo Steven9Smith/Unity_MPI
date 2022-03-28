@@ -1,4 +1,4 @@
-﻿
+﻿#define WINDOWS_BUILD
 
 using System;
 using System.Linq;
@@ -139,10 +139,12 @@ namespace MpiLibrary
                 + $"tag: {MPI_TAG} \n\terror: {MPI_ERROR}";
             }
         }
-    
+
 
         // The name of the MPI Library to load
+#if WINDOWS_BUILD
         private const string MPI_LIBRARY = "MpiLibrary.dll";
+#endif
 
         // The command-line invocation of dotnet
         private const string DOTNET_COMMAND = "dotnet";
@@ -558,7 +560,9 @@ namespace MpiLibrary
         {
             // Pre-load dependencies of the wrapping module; necessary to grab the right _version_
             // libmpi.so.12 is for OpenMPI on Ubuntu16.04; libmpi.so.20 for Ubuntu18.04.
-            //    dlopen("libmpi.so.12", RTLD_LAZY | RTLD_GLOBAL);
+#if !WINDOWS_BUILD
+            dlopen("libmpi.so.12", RTLD_LAZY | RTLD_GLOBAL);
+#endif
             InitializeMpi(args);
         }
 
@@ -572,7 +576,7 @@ namespace MpiLibrary
         {
             FinalizeMpi();
         }
-        #region MPI_Send
+#region MPI_Send
         public int MPI_Send(int buf, int count, int dest, int tag)
         {
             return mpi_send_int_s(buf, count, dest, tag);
@@ -654,8 +658,8 @@ namespace MpiLibrary
             return mpi_send_ushort(buf, count, dest, tag,comm);
         }  
      
-        #endregion
-        #region MPI_Send_Array
+#endregion
+#region MPI_Send_Array
         public int MPI_Send(int[] buf, int count, int dest, int tag)
         {
             return mpi_send_int_array_s(buf, count, dest, tag);
@@ -696,8 +700,8 @@ namespace MpiLibrary
         {
             return mpi_send_ulong_array_s(buf, count, dest, tag);
         }
-        #endregion
-        #region MPI_Ssend
+#endregion
+#region MPI_Ssend
         public int MPI_Ssend(int buf, int count, int dest, int tag)
         {
             return mpi_ssendi(buf, count, dest, tag);
@@ -714,8 +718,8 @@ namespace MpiLibrary
         {
             return mpi_ssendf(buf, count, dest, tag);
         }
-        #endregion
-        #region MPI_ISend  
+#endregion
+#region MPI_ISend  
         public int MPI_ISend(int buf, int count, int dest, int tag)
         {
             return mpi_isendi(buf, count, dest, tag);
@@ -732,8 +736,8 @@ namespace MpiLibrary
         {
             return mpi_isendf(buf, count, dest, tag);
         }
-        #endregion
-        #region MPI_RSend
+#endregion
+#region MPI_RSend
         public int MPI_RSend(int buf, int count, int dest, int tag)
         {
             return mpi_rsendi(buf, count, dest, tag);
@@ -750,8 +754,8 @@ namespace MpiLibrary
         {
             return mpi_rsendf(buf, count, dest, tag);
         }
-        #endregion
-        #region MPI_BSend
+#endregion
+#region MPI_BSend
         public int MPI_BSend(int buf, int count, int dest, int tag, ref int mpi_request)
         {
             return mpi_bsendi(buf, count, dest, tag, ref mpi_request);
@@ -768,8 +772,8 @@ namespace MpiLibrary
         {
             return mpi_bsendf(buf, count, dest, tag, ref mpi_request);
         }
-        #endregion
-        #region MPI_Recv
+#endregion
+#region MPI_Recv
 
         public int MPI_Recv(ref int buf, int count, int source, int tag, out MPI_Status status)
         {
@@ -1174,8 +1178,8 @@ namespace MpiLibrary
             };
             return response;
         }
-        #endregion
-        #region MPI_Recv_Array
+#endregion
+#region MPI_Recv_Array
         public int MPI_Recv(ref int[] buf, int count, int source, int tag, out MPI_Status status)
         {
 
@@ -1594,8 +1598,8 @@ namespace MpiLibrary
             };
             return response;
         }
-        #endregion
-        #region MPI_Bcast
+#endregion
+#region MPI_Bcast
         public int MPI_Bcast(ref char buf, int count, int root)
         {
             return mpi_bcast_char(ref buf, count , root);
@@ -1677,8 +1681,8 @@ namespace MpiLibrary
         {
             return mpi_bcast_ushort_array(buf, count , root);
         }
-        #endregion
-        #region General_Functions
+#endregion
+#region General_Functions
         /// <summary>
         /// Creates a new communicator 
         /// </summary>
@@ -1906,7 +1910,7 @@ namespace MpiLibrary
         {
             return external_reduce_with_callback(reduceFunc, array, arraySize);
         }
-        #endregion
+#endregion
     }
 
     public static class MpiExtensions {
@@ -1935,7 +1939,7 @@ namespace MpiLibrary
 
     
 
-    #region MPI_Manager
+#region MPI_Manager
     public class MpiManager : IDisposable{
         public static Mpi mpi = null;    
         // MPI Manager is set to use tags 12345 - (12345+worldSize) so please try not to use them for data passing
@@ -2164,5 +2168,5 @@ namespace MpiLibrary
             }
         }
     }
-    #endregion
+#endregion
 }
