@@ -9,20 +9,20 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 
+
 namespace UnityMpi.Tests
 {
     public class MpiTestScript : MonoBehaviour,IConvertGameObjectToEntity
     {
         public string dataFilePath = "";
         public string[] args;
-
+        
         void Start(){
             DOTSMpiManager manager = new DOTSMpiManager(new string[] { });
-
+               
             if (manager.worldRank == 0)
             {
                 Debug.Log("MpiManager Info:\n" + manager.ToString());
-
             }
             manager.Dispose();
         }

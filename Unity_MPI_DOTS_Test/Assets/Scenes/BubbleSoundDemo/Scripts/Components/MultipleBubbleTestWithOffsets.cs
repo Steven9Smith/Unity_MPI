@@ -1,16 +1,12 @@
 ﻿
 using UnityEngine;
-using System.Collections;
-using MathNet.Numerics.LinearAlgebra;
-using UnityEngine.Profiling;
 using System;
-using System.Collections.Generic;
 using NAudio.Wave;
 using System.IO;
 
+
 public class MultipleBubbleTestWithOffsets : MonoBehaviour
 {
-
 	public Float_BubbleSoundDataCondensedDynamic[] bubbles;
 	public int sampleRate = 41000;
 	public bool PlayOnStart = true;
@@ -24,7 +20,7 @@ public class MultipleBubbleTestWithOffsets : MonoBehaviour
 
 	private void OnEnable()
 	{
-		audioSource = GetComponent<AudioSource>();
+			audioSource = GetComponent<AudioSource>();
 		if (audioSource == null) audioSource = this.gameObject.AddComponent<AudioSource>();
 
 
@@ -53,6 +49,11 @@ public class MultipleBubbleTestWithOffsets : MonoBehaviour
 		{
 			bubbles[i] = new Float_BubbleSoundDataCondensedDynamic(bubbles[i].interfacetype, bubbles[i].movingtype, bubbles[i].radius, bubbles[i].depth,bubbles[i].from,bubbles[i].to,bubbles[i].start,bubbles[i].end, bubbles[i].steps);
 			bubbles[i].Init(Float_BubbleSoundDataCondensedDynamic.Init_Mode.Fast_Formatted, true,true);
+		//	string s = "";
+		//	for (int j = 0; j < bubbles[i].raw_data.Length;j++)
+		//		s += bubbles[i].raw_data[j][1]+",";
+		//	Debug.Log(s);
+
 			if (SaveToFile)
 			{
 				path = Application.dataPath + "/Wave_Outputs/";
@@ -91,8 +92,8 @@ public class MultipleBubbleTestWithOffsets : MonoBehaviour
 
 	void OnAudioRead(float[] data)
 	{
-		Debug.Log($"data length: {data.Length}, currentStep {currentStep}," +
-			$" max {bubbles[0].formatted_data.Length}");
+	//	Debug.Log($"data length: {data.Length}, currentStep {currentStep}," +
+	//		$" max {bubbles[0].formatted_data.Length}");
 		int total = bubbles[0].formatted_data.Length - currentStep - data.Length;
 		if (total > data.Length) total = data.Length;
 		else if (total <= 0 && currentStep < bubbles[0].formatted_data.Length)
@@ -101,7 +102,7 @@ public class MultipleBubbleTestWithOffsets : MonoBehaviour
 		//if (currentStep + data.Length >= bubbles[0].formatted_data.Length)
 		if(total <= 0)
 		{
-			Debug.Log("exceeded data lnegth, no more!");
+	//		Debug.Log("exceeded data lnegth, no more!");
 			for (int i = 0; i < data.Length; i++)
 				data[i] = 0;
 			return;

@@ -91,6 +91,7 @@ public struct Float_BubbleSoundDataCondensedDynamic
 	}
 	public void Init(Init_Mode mode, bool convert_to_wav_format = true,bool useFromTo = false)
 	{
+		Debug.Log($"{this.depth},{this.radius},{from},{to},{steps},{start},{end},{interfacetype},{movingtype}");
 		switch (mode)
 		{
 			case Init_Mode.Raw:
@@ -220,9 +221,9 @@ public struct Float_BubbleSoundDataCondensedDynamic
 
 		return vt;
 	}
-
 	public static Vector<double>[] CalculateRawSound(Float_BubbleSoundDataCondensedDynamic data, bool fastCalculation = false)
 	{
+
 		float m_depth = data.depth;
 		float m_radius = data.radius;
 		// Integrate the bubble sound into a buffer
@@ -239,6 +240,7 @@ public struct Float_BubbleSoundDataCondensedDynamic
 
 				if (data.movingtype == 2 && t >= 0.1f)
 				{
+					Debug.LogError("BBBBBB");
 					// rising bubble, calc depth
 
 					float vt = Float_BubbleSoundData.BubbleTerminalVelocity(m_radius);
@@ -273,11 +275,82 @@ public struct Float_BubbleSoundDataCondensedDynamic
 					{
 				//		Debug.Log("DETECTED NAN! f: " + f + ", m: " + m + ", w0: " + w0 + ", beta: " + beta + ", t: " + t + ", y[0]=" + Y[0] + ", y[1]=" + Y[1]);
 					}
+					//if(acc != 0 || Y[0] != 0 || Y[1] != 0)
+					//	Debug.Log($"{acc},{Y[0]},{Y[1]}");
 					return Vector<double>.Build.Dense(new[] { acc, Y[0] });
 				}
 			};
 		}
-		
+		string s = "";
+		for (int i = 0; i < sol.Length; i++)
+			s += sol[i][1] + ",";
+		return sol;
+	}
+	public static Vector<double>[] CalculateRawSound(DOTS_Bubble_Data data, bool fastCalculation = false)
+	{
+		Debug.Log($"P|{data.depth},{data.radius},{data.from},{data.to},{data.steps},{data.start},{data.end},{(byte)data.m_interfacetype},{(byte)data.m_movingtype}");
+
+		float m_depth = data.depth;
+		float m_radius = data.radius;
+		// Integrate the bubble sound into a buffer
+		var sol = fastCalculation ? RungeKutta.SecondOrder(DEFAULT_INITIAL_VALUE, data.start, data.end, data.steps, DerivativeMaker())
+			: RungeKutta.FourthOrder(DEFAULT_INITIAL_VALUE, data.start, data.end, data.steps, DerivativeMaker());
+		Func<double, Vector<double>, Vector<double>> DerivativeMaker()
+		{
+			return (t, Y) =>
+			{
+				//[f'; f]
+				float f = Float_BubbleSoundData.JetForcing(m_radius, (float)t - 0.1f);
+
+				float d = m_depth;
+
+				if ((byte)data.m_movingtype == 2 && t >= 0.1f)
+				{
+					Debug.LogError("BBBBBB");
+					// rising bubble, calc depth
+
+					float vt = Float_BubbleSoundData.BubbleTerminalVelocity(m_radius);
+
+					d = math.max(0.51f * 2f * m_radius, m_depth - ((float)t - 0.1f) * vt);
+
+					// print('vt: ' + str(vt))
+					// print('d: ' + str(d))
+				}
+				//if we let it run too long and the values get very small,
+				// the scipy integrator has problems. Might be setting the time step too
+				// small? So just exit when the oscillator loses enough energy
+				if (t > 0.11f && math.sqrt(math.pow(Y[0], 2) + math.pow(Y[1], 2)) < 1e-15f)
+				{
+					return Vector<double>.Build.Dense(new[] { 0.0, 0.0 });
+				}
+				else
+				{
+					float p0 = Float_BubbleSoundData.PATM + 2.0f * Float_BubbleSoundData.SIGMA / m_radius;
+					float v0 = 4f / 3f * math.PI * math.pow(m_radius, 3);
+
+					float w0 = Float_BubbleSoundData.ActualFreq((byte)data.m_interfacetype, m_radius, d) * 2 * math.PI;
+					float k = Float_BubbleSoundData.GAMMA * p0 / v0;
+
+					float m = k / math.pow(w0, 2);
+
+					float beta = Float_BubbleSoundData.CalcBeta(m_radius, w0);
+
+					float acc = f / m - 2 * beta * (float)Y[0] - math.pow(w0, 2) * (float)Y[1];
+
+					if (float.IsNaN(acc))
+					{
+						//		Debug.Log("DETECTED NAN! f: " + f + ", m: " + m + ", w0: " + w0 + ", beta: " + beta + ", t: " + t + ", y[0]=" + Y[0] + ", y[1]=" + Y[1]);
+					}
+					//if(acc != 0 || Y[0] != 0 || Y[1] != 0)
+					//	Debug.Log($"{acc},{Y[0]},{Y[1]}");
+					return Vector<double>.Build.Dense(new[] { acc, Y[0] });
+				}
+			};
+		}
+		string s = "";
+		for (int i = 0; i < sol.Length; i++)
+			s += sol[i][1] + ",";
+		Debug.Log(s);
 		return sol;
 	}
 
@@ -607,8 +680,8 @@ public struct Float_BubbleSoundDataCondensed
 				sol = RungeKutta.SecondOrder(DEFAULT_INITIAL_VALUE, start, end, data.steps, DerivativeMaker());
 				break;
 			case Init_Mode.Formatted:
-				break;
 				sol = RungeKutta.FourthOrder(DEFAULT_INITIAL_VALUE, start, end, data.steps, DerivativeMaker());
+				break;
 		}
 		
 		Func<double, Vector<double>, Vector<double>> DerivativeMaker()
@@ -676,8 +749,8 @@ public struct Float_BubbleSoundDataCondensed
 				sol = AdamsBashforth.FourthOrder(0, 0, 1, data.steps, DerivativeMaker());
 				break;
 			case Init_Mode.Formatted:
-				break;
 				sol = AdamsBashforth.SecondOrder(0, 0, 1, data.steps, DerivativeMaker());
+				break;
 		}
 
 		Func<double, double, double> DerivativeMaker()
@@ -1018,6 +1091,13 @@ public struct Float_BubbleSoundData
 		else // Rigid interface
 			return radius / (1f + radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
 	}
+	public static double BubbleCapacitance(byte interface_type, double radius, double depth)
+	{
+		if (interface_type == rigid_interface)
+			return radius / (1 - radius / (2 * depth) - math.pow((radius / (2 * depth)), 4));
+		else // Rigid interface
+			return radius / (1 + radius / (2 * depth) - math.pow((radius / (2 * depth)), 4));
+	}
 	public static float MinnaertFreq(float radius)
 	{
 		float omega = math.sqrt(3f * GAMMA * PATM - 2f * SIGMA * radius) / (radius * math.sqrt(RHO_WATER));
@@ -1034,6 +1114,21 @@ public struct Float_BubbleSoundData
 
 		//	Debug.Log("C = " + v0+":: "+( 4.0f * math.PI * GAMMA * p0 * bubbleCapacitance )+ "::"+(RHO_WATER * v0)+"::"+ (4.0f * math.PI * GAMMA * p0 * bubbleCapacitance / (RHO_WATER * v0)));
 		float omega = math.sqrt(4f * math.PI * GAMMA * p0 * bubbleCapacitance / (RHO_WATER * v0));
+
+		//	Debug.Log("D = " + omega);
+		return omega / 2f / math.PI;
+	}
+	public static double ActualFreq(byte interface_type, double radius, double depth)
+	{
+		double bubbleCapacitance = BubbleCapacitance(interface_type, radius, depth);
+
+		double p0 = PATM;
+		//	Debug.Log("r = "+radius+", d = "+depth+", C = " + bubbleCapacitance);
+
+		double v0 = 4 / 3 * math.PI * math.pow(radius, 3);
+
+		//	Debug.Log("C = " + v0+":: "+( 4.0f * math.PI * GAMMA * p0 * bubbleCapacitance )+ "::"+(RHO_WATER * v0)+"::"+ (4.0f * math.PI * GAMMA * p0 * bubbleCapacitance / (RHO_WATER * v0)));
+		double omega = math.sqrt(4 * math.PI * GAMMA * p0 * bubbleCapacitance / (RHO_WATER * v0));
 
 		//	Debug.Log("D = " + omega);
 		return omega / 2f / math.PI;
@@ -1055,6 +1150,23 @@ public struct Float_BubbleSoundData
 
 		return w0 * dtotal / math.sqrt(math.pow(dtotal, 2) + 4f);
 	}
+	public static double CalcBeta(double radius, double w0)
+	{
+
+		double dr = w0 * radius / CF;
+		double dvis = 4 * MU / (RHO_WATER * w0 * math.pow(radius, 2));
+
+		double phi = 16 * GTH * G / (9f * math.pow((GAMMA - 1), 2) * w0);
+
+		double dth = 2 * (math.sqrt(phi - 3) - (3 * GAMMA - 1) /
+				 (3 * (GAMMA - 1))) / (phi - 4);
+
+
+		double dtotal = dr + dvis + dth;
+
+
+		return w0 * dtotal / math.sqrt(math.pow(dtotal, 2) + 4f);
+	}
 	public static float JetForcing(float r, float t)
 	{
 
@@ -1071,6 +1183,28 @@ public struct Float_BubbleSoundData
 
 		// Convert to pressure
 		float mrp = RHO_WATER * r;
+
+		jval *= mrp;
+
+
+		return jval;
+	}
+	public static double JetForcing(double r, double t,bool a)
+	{
+
+		double cutoff = math.min(0.0006, 0.5 / (3 / r));
+
+		if (t < 0 || t > cutoff)
+			return 0;
+		double jval = (-9 * GAMMA * SIGMA * ETA *
+				(PATM + 2 * SIGMA / r) * math.sqrt(1 + math.pow(ETA, 2)) /
+				(4 * math.pow(RHO_WATER, 2) * math.pow(r, 5)) * math.pow(t, 2));
+
+		// Convert to radius (instead of fractional radius)
+		jval *= r;
+
+		// Convert to pressure
+		double mrp = RHO_WATER * r;
 
 		jval *= mrp;
 

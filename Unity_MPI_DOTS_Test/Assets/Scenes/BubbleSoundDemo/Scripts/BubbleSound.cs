@@ -17,7 +17,7 @@ public class IntegrateBubbleMultiThreaded
 	public double start, end;
 	double d0, r, dt;
 	byte interface_type, moving_type;
-	int threads,completedThreads;
+	//int threads,completedThreads;
 	public List<Vector<double>> data;
 
 	public IntegrateBubbleMultiThreaded(byte interface_type, byte moving_type, Vector<double> y0, double r, double d0, double dt,int threads = 2, double start = 0, double end = 1, int nSize = 96000)
@@ -31,8 +31,8 @@ public class IntegrateBubbleMultiThreaded
 		this.start = start;
 		this.end = end;
 		this.nSize = nSize;
-		this.threads = threads;
-		this.completedThreads = 0;
+	//	this.threads = threads;
+	//	this.completedThreads = 0;
 		data = new List<Vector<double>>();
 	}
 	public async Task<Vector<double>[]> Exec()

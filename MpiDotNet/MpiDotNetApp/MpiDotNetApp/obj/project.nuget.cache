@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VXh4M46sZtMSe6LqiS9UliW8zPJJVu7oDU2RvsW+O3fy3g/v3DGqa1h5yN1bwCIYPMW9/+0p1cuGS7jNxe6fnw==",
+  "dgSpecHash": "LCD0IaNxnpDs1O0UBaI54v/XD81VyYobQqfUH3aI9GzNa8yDyGvA5USovVtIeXP/vBXvnpgOWc7jfoal6LfVEA==",
   "success": true,
-  "projectFilePath": "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\Windows\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj",
+  "projectFilePath": "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj",
   "expectedPackageFiles": [
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.app\\2.1.0\\microsoft.netcore.app.2.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.dotnetapphost\\2.1.0\\microsoft.netcore.dotnetapphost.2.1.0.nupkg.sha512",

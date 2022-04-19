@@ -25,7 +25,7 @@ public class BubbleSoundStreamTest : MonoBehaviour
 	private AudioSource audioSource;
 	private AudioClip clip;
 	private Float_BubbleSoundDataCondensed bsd;
-	int audioPosition = 0;
+//	int audioPosition = 0;
 	int currentStep = 0;
 	System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 	Vector<double> lastValue = Float_BubbleSoundDataCondensed.DEFAULT_INITIAL_VALUE;

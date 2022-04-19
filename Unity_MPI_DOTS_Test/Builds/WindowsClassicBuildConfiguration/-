@@ -1,0 +1,144 @@
+Mono path[0] = 'K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data/Managed'
+Mono config path = 'K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/MonoBleedingEdge/etc'
+PlayerConnection initialized from K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data (debug = 0)
+Mono path[0] = 'K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data/Managed'
+Mono config path = 'K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/MonoBleedingEdge/etc'
+PlayerConnection initialized from K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data (debug = 0)
+PlayerConnection initialized network socket : 0.0.0.0 55379
+Multi-casting "[IP] 192.168.137.1 [Port] 55379 [Flags] 2 [Guid] 3806945842 [EditorId] 1271532960 [Version] 1048832 [Id] WindowsPlayer(DESKTOP-UK45PU3) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] Windows_MPI_Test" to [225.0.0.222:54997]...
+Started listening to [0.0.0.0:55379]
+PlayerConnection initialized network socket : 0.0.0.0 55069
+Multi-casting "[IP] 192.168.137.1 [Port] 55069 [Flags] 2 [Guid] 1766209487 [EditorId] 1271532960 [Version] 1048832 [Id] WindowsPlayer(DESKTOP-UK45PU3) [Debug] 0 [PackageName] WindowsPlayer [ProjectName] Windows_MPI_Test" to [225.0.0.222:54997]...
+Started listening to [0.0.0.0:55069]
+PlayerConnection already initialized - listening to [0.0.0.0:55379]
+PlayerConnection already initialized - listening to [0.0.0.0:55069]
+Initialize engine version: 2020.3.30f1 (1fb1bf06830e)
+[Subsystems] Discovering subsystems at path K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data/UnitySubsystems
+Forcing GfxDevice: Null
+GfxDevice: creating device client; threaded=0
+NullGfxDevice:
+Initialize engine version: 2020.3.30f1 (1fb1bf06830e)
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+[Subsystems] Discovering subsystems at path K:/Unity/Projects/Unity_MPI_DOTS_Test/Builds/WindowsClassicBuildConfiguration/Windows_MPI_Test_Data/UnitySubsystems
+Forcing GfxDevice: Null
+GfxDevice: creating device client; threaded=0
+NullGfxDevice:
+    Version:  NULL 1.0 [1.0]
+    Renderer: Null Device
+    Vendor:   Unity Technologies
+Begin MonoManager ReloadAssembly
+Begin MonoManager ReloadAssembly
+- Completed reload, in  0.344 seconds
+- Completed reload, in  0.359 seconds
+ERROR: Shader Hidden/Universal Render Pipeline/Blit shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/CopyDepth shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/ScreenSpaceShadows shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Sampling shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/LutBuilderLdr shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/LutBuilderHdr shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/UberPost shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Stop NaN shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/SubpixelMorphologicalAntialiasing shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/GaussianDepthOfField shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/BokehDepthOfField shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/CameraMotionBlur shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/PaniniProjection shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Bloom shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/FinalPost shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Hidden/Universal Render Pipeline/StencilDeferred' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Hidden/Universal Render Pipeline/StencilDeferred shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Hidden/Universal Render Pipeline/StencilDeferred' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Sprites/Default shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+Microsoft Media Foundation video decoding to texture disabled: graphics device is Null, only Direct3D 11 and Direct3D 12 (only on desktop) are supported for hardware-accelerated video decoding.
+ERROR: Shader Hidden/Universal Render Pipeline/Blit shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/CopyDepth shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/ScreenSpaceShadows shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Sampling shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/LutBuilderLdr shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/LutBuilderHdr shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/UberPost shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Stop NaN shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/SubpixelMorphologicalAntialiasing shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/GaussianDepthOfField shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/BokehDepthOfField shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/CameraMotionBlur shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/PaniniProjection shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/Bloom shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+ERROR: Shader Hidden/Universal Render Pipeline/FinalPost shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Hidden/Universal Render Pipeline/StencilDeferred' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Hidden/Universal Render Pipeline/StencilDeferred shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Hidden/Universal Render Pipeline/StencilDeferred' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Sprites/Default shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+Microsoft Media Foundation video decoding to texture disabled: graphics device is Null, only Direct3D 11 and Direct3D 12 (only on desktop) are supported for hardware-accelerated video decoding.
+ERROR: Shader Sprites/Mask shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Universal Render Pipeline/Lit' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Universal Render Pipeline/Lit shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Universal Render Pipeline/Lit' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+UnloadTime: 0.610600 ms
+ERROR: Shader Sprites/Mask shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Universal Render Pipeline/Lit' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Universal Render Pipeline/Lit shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Universal Render Pipeline/Lit' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+UnloadTime: 0.549000 ms
+Warning: No Graphics Device found. Deformation systems will not run.
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/buildslave/unity/build/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Unity.Rendering.DeformationsInPresentation:OnCreate () (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.rendering.hybrid@0.11.0-preview.44/Unity.Rendering.Hybrid/Deformations/DeformationSystemGroup.cs:19)
+Unity.Entities.ComponentSystemBase:CreateInstance (Unity.Entities.World,Unity.Entities.SystemState*) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/ComponentSystemBase.cs:121)
+Unity.Entities.World:AddSystem_OnCreate_Internal (Unity.Entities.ComponentSystemBase) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/World.cs:275)
+Unity.Entities.World:GetOrCreateSystemsAndLogException (System.Collections.Generic.IEnumerable`1<System.Type>,int) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/World.cs:470)
+Unity.Entities.DefaultWorldInitialization:AddSystemToRootLevelSystemGroupsInternal (Unity.Entities.World,System.Collections.Generic.IEnumerable`1<System.Type>,int) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/DefaultWorldInitialization.cs:187)
+Unity.Entities.DefaultWorldInitialization:Initialize (string,bool) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/DefaultWorldInitialization.cs:128)
+Unity.Entities.AutomaticWorldBootstrap:Initialize () (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities.Hybrid/Injection/AutomaticWorldBootstrap.cs:16)
+
+(Filename: K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.rendering.hybrid@0.11.0-preview.44/Unity.Rendering.Hybrid/Deformations/DeformationSystemGroup.cs Line: 19)
+
+Warning: No Graphics Device found. Deformation systems will not run.
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at C:/buildslave/unity/build/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:LogWarning (object)
+Unity.Rendering.DeformationsInPresentation:OnCreate () (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.rendering.hybrid@0.11.0-preview.44/Unity.Rendering.Hybrid/Deformations/DeformationSystemGroup.cs:19)
+Unity.Entities.ComponentSystemBase:CreateInstance (Unity.Entities.World,Unity.Entities.SystemState*) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/ComponentSystemBase.cs:121)
+Unity.Entities.World:AddSystem_OnCreate_Internal (Unity.Entities.ComponentSystemBase) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/World.cs:275)
+Unity.Entities.World:GetOrCreateSystemsAndLogException (System.Collections.Generic.IEnumerable`1<System.Type>,int) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/World.cs:470)
+Unity.Entities.DefaultWorldInitialization:AddSystemToRootLevelSystemGroupsInternal (Unity.Entities.World,System.Collections.Generic.IEnumerable`1<System.Type>,int) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/DefaultWorldInitialization.cs:187)
+Unity.Entities.DefaultWorldInitialization:Initialize (string,bool) (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities/DefaultWorldInitialization.cs:128)
+Unity.Entities.AutomaticWorldBootstrap:Initialize () (at K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.entities@0.17.0-preview.42/Unity.Entities.Hybrid/Injection/AutomaticWorldBootstrap.cs:16)
+
+(Filename: K:/Unity/Projects/Unity_MPI_DOTS_Test/Library/PackageCache/com.unity.rendering.hybrid@0.11.0-preview.44/Unity.Rendering.Hybrid/Deformations/DeformationSystemGroup.cs Line: 19)
+
+
+job aborted:
+[ranks] message
+
+[0] job terminated by the user
+
+[1] terminated
+
+---- error analysis -----
+
+[0] on DESKTOP-UK45PU3
+ctrl-c was hit. job aborted by the user.
+
+---- error analysis -----

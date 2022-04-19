@@ -1,32 +1,37 @@
 {
   "format": 1,
   "restore": {
-    "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj": {}
+    "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj": {}
   },
   "projects": {
-    "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj": {
+    "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj",
+        "projectUniqueName": "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj",
         "projectName": "MpiDotNetApp",
-        "projectPath": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/MpiDotNetApp.csproj",
-        "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/home/node2/Documents/GitHub/Unity_MPI/MpiDotNet/Windows/MpiDotNetApp/MpiDotNetApp/obj/",
+        "projectPath": "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\MpiDotNetApp.csproj",
+        "packagesPath": "C:\\Users\\Ninetails Kurama\\.nuget\\packages\\",
+        "outputPath": "E:\\Documents\\GitHub\\Unity_MPI\\MpiDotNet\\MpiDotNetApp\\MpiDotNetApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "/usr/share/dotnet/sdk/NuGetFallbackFolder"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "/root/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Ninetails Kurama\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.1"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netcoreapp2.1": {
+            "targetAlias": "netcoreapp2.1",
             "projectReferences": {}
           }
         },
@@ -38,18 +43,26 @@
       },
       "frameworks": {
         "netcoreapp2.1": {
+          "targetAlias": "netcoreapp2.1",
           "dependencies": {
             "Microsoft.NETCore.App": {
+              "suppressParent": "All",
               "target": "Package",
               "version": "[2.1.0, )",
               "autoReferenced": true
             }
           },
           "imports": [
-            "net461"
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
           ],
           "assetTargetFallback": true,
-          "warn": true
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.201\\RuntimeIdentifierGraph.json"
         }
       }
     }
