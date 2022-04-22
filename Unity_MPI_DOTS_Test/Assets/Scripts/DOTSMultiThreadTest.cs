@@ -79,7 +79,6 @@ public partial class RungeKuttaSingleJob : SystemBase
         private NativeArray<double> x_tmp, k1, k2, k3, k4;
         private double dt;
         private double dt2, dt3, dt6;
-        private double x0;
         public runge_kutta4_single(int size_n,double start,double end,Allocator allocator)
         {
             N = size_n;
@@ -92,7 +91,7 @@ public partial class RungeKuttaSingleJob : SystemBase
             dt2 = dt / 2;
             dt3 = dt / 3;
             dt6 = dt / 6;
-            x0 = 0;
+           
         }
         public void Dispose()
         {
@@ -247,7 +246,6 @@ public partial class RungeKuttaSingleJob : SystemBase
 [UpdateAfter(typeof(RungeKuttaSingleJob))]
 public partial class RungeKutaParallel_A : SystemBase
 {
-
     NativeArray<double> input;
     NativeArray<JobHandle> order;
     int max_processors;

@@ -26,6 +26,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = this.gameObject.AddComponent<AudioSource>();
+		audioSource.loop = true;
 
 
         //	var a = AudioClip.Create("Test", wav_data.Length, 1, 41000, false);
@@ -34,6 +35,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
 
 	private Play_Bubble_Sound play_bubble_sound_system;
 	private EntityManager em;
+	private EntityArchetype BubbleArchtype;
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +45,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     {
 		Debug.LogWarning("Getting Play Bubble System");
 		em = World.DefaultGameObjectInjectionWorld.EntityManager;
+		BubbleArchtype = em.CreateArchetype(typeof(DOTS_Bubble_Data), typeof(BubbleGenerationRequest));
 		play_bubble_sound_system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<Play_Bubble_Sound>();
 		if(play_bubble_sound_system != null)
         {
@@ -60,14 +63,19 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
             {
 				for(int i = 0; i < bubbles.Length; i++)
                 {
-					Entity e = em.CreateEntity();
-					em.AddComponentData(e,new DOTS_Bubble_Data(bubbles[i].m_interfacetype,bubbles[i].m_movingtype,bubbles[i].radius,
-						bubbles[i].depth,bubbles[i].from,bubbles[i].to,bubbles[i].start,bubbles[i].end,bubbles[i].steps,bubbles[i].timeLeft));
-					var buf = em.AddBuffer<DB_Float>(e);
-					for (int j = 0; j < sampleRate; j++)
-						buf.Add(new DB_Float());
+					NativeArray<Entity> entities = new NativeArray<Entity>(1, Allocator.TempJob);
+					em.CreateEntity(BubbleArchtype,entities);
+					for(int j = 0; j < entities.Length; j++)
+                    {
+						em.SetComponentData(entities[j], new DOTS_Bubble_Data(bubbles[i].m_interfacetype, bubbles[i].m_movingtype, bubbles[i].radius,
+							bubbles[i].depth, bubbles[i].from, bubbles[i].to, bubbles[i].start, bubbles[i].end, bubbles[i].steps, bubbles[i].timeLeft)
+						);
+						//	var buf = em.AddBuffer<DB_Float>(e);
+						//	for (int j = 0; j < sampleRate; j++)
+						//		buf.Add(new DB_Float());
 
-                }
+					}
+				}
 				PlayOnStart = false;
             }
 		}
@@ -104,11 +112,10 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     }
    */
 }
-
-
-public class DOTS_Bubble_Authoring
+public struct BubbleAdditionalInfo : IComponentData
 {
-	
+	public int start,end;
+	public float dt, dt2, dt6;
 }
 [System.Serializable]
 public struct DOTS_Bubble_Data : IComponentData
@@ -157,7 +164,7 @@ public struct DOTS_Bubble_Data : IComponentData
 	public int from, to;
 	public bool IsInitialized;
 	public float timeLeft;
-	float min, max;
+	public float2 minmax;
 	// to be handled in a Dynamic Buffer
 	//public NativeArray<float> raw_data;
 	//public float[] formatted_data;
@@ -185,8 +192,7 @@ public struct DOTS_Bubble_Data : IComponentData
 	//	raw_data = new Vector<float>[0];
 	//	formatted_data = new float[0];
 		IsInitialized = false;
-		min = 0;
-		max = 0;
+		minmax = new float2();
 	}
 	public static float BubbleCapacitance(byte interface_type, float radius, float depth)
 	{
@@ -371,12 +377,27 @@ public struct DOTS_Bubble_Data : IComponentData
 		var minmax = GetMinMax(input);
 		return ApplyWavFormat(minmax[0], minmax[1], input);
 	}
-	public static NativeArray<float> ApplyWavFormat(NativeArray<float2> input,Allocator allocator)
+	public static NativeArray<float> ApplyWavFormat(ref DOTS_Bubble_Data data,NativeArray<float2> input,Allocator allocator)
 	{
 		// now we trim
-		var minmax = GetMinMax(input,out var tmp, allocator);
-		return ApplyWavFormat(minmax[0], minmax[1], tmp);
+		data.minmax = GetMinMax(input,out var tmp, allocator);
+		return ApplyWavFormat(data.minmax[0], data.minmax[1], tmp);
 	}
+	public static void ApplyWavFormat(NativeArray<float2> raw_data,BubbleAdditionalInfo bInfo)
+	{
+		//NOTE: we only apply change to raw_data[i].y as the x is useless to us atm
+		float max = GetMax(raw_data);
+		float m = 1.05f / max; 
+		for (int i = bInfo.start; i < bInfo.end; i++)
+		{
+			float2 d = raw_data[i];
+		//	d.y = d.y / math.max(minmax[0], minmax[1]) * 1.05f;
+			d.y = d.y * m;
+			raw_data[i] = d;
+		}
+	}
+
+
 	public static NativeArray<float> ApplyWavFormat(float min, float max, NativeArray<float> input)
 	{
 		// now we trim
@@ -425,6 +446,15 @@ public struct DOTS_Bubble_Data : IComponentData
 			if (sol[i].y < min) min = sol[i].y;
 		}
 		return new float2(min, max);
+	}
+	public static float GetMax(NativeArray<float2> sol)
+	{
+		float max = float.MinValue;
+		for (int i = 0; i < sol.Length; i++)
+		{
+			if (sol[i].y > max) max = sol[i].y;
+		}
+		return max;
 	}
 	public static float2 GetMinMax(NativeArray<float2> sol,
 		out NativeArray<float> simplified_arr,Allocator allocator)
@@ -567,14 +597,181 @@ public struct DB_Float : IBufferElementData
 		return dd;
 	}
 }
+
+public struct BubbleGenerationRequest : IComponentData {
+	//public DOTS_Bubble_Data data;
+}
+
+
 [UpdateAfter(typeof(MathNetRungeKutta))]
 public partial class RungeKuttaBubbleSystem : SystemBase
 {
+	[BurstCompile]
+	private struct DOTS_Step_Calculations
+    {
+		private DOTS_Bubble_Data.InterfaceType interfaceType;
+		private DOTS_Bubble_Data.MovingType movingType;
+		private float radius, depth;
+		private float p0,v0,k;
+		// For Jet Forcing
+		float cutoff,mrp,jval_initial;
+		// Bubble Terminal Velocity
+		private const float del_rho = 997f; // Density difference between the phases
+		private float vt;
+		// rising bubble
+		private float rising_d_m1;
+		// Actual Freq
+		private float AF_v0,AF_omega_a,AF_b;
+		// Calculate Beta
+		private float B_dr_a,B_dvis_a,B_dvis_b,B_phi_a,B_phi_B,B_dth_a;
+		public DOTS_Step_Calculations(DOTS_Bubble_Data data)
+        {
+			radius = data.radius;
+			depth = data.depth;
+			interfaceType = data.m_interfacetype;
+			movingType = data.m_movingtype;
+
+			p0 = DOTS_Bubble_Data.PATM + 2.0f * DOTS_Bubble_Data.SIGMA / data.radius;
+			v0 = 4f / 3f * math.PI * math.pow(data.radius, 3);
+			k = DOTS_Bubble_Data.GAMMA * p0 / v0; 
+
+			// Jet Forcing
+			cutoff = math.min(0.0006f, 0.5f / (3f / data.radius));
+			mrp = DOTS_Bubble_Data.RHO_WATER * data.radius;
+			jval_initial = (-9f * DOTS_Bubble_Data.GAMMA * DOTS_Bubble_Data.SIGMA * DOTS_Bubble_Data.ETA *
+					(DOTS_Bubble_Data.PATM + 2f * DOTS_Bubble_Data.SIGMA / data.radius) * math.sqrt(1f + math.pow(DOTS_Bubble_Data.ETA, 2)) /
+					(4f * math.pow(DOTS_Bubble_Data.RHO_WATER, 2) * math.pow(data.radius, 5))) * data.radius * mrp;
+			// Bubble Terminal Velocity
+			vt = BubbleTerminalVelocity(data.radius);
+			// Rising Bubble
+			if (data.m_movingtype == DOTS_Bubble_Data.MovingType.Rising)
+				rising_d_m1 = 0.51f * 2f * data.radius;
+			else
+				rising_d_m1 = data.depth;
+			// Actual Freq
+			AF_v0 = 4f / 3f * math.PI * math.pow(data.radius, 3);
+			AF_omega_a = 4f * math.PI * DOTS_Bubble_Data.GAMMA * DOTS_Bubble_Data.PATM / (DOTS_Bubble_Data.RHO_WATER * AF_v0);
+			AF_b = 2 * math.PI;
+			// Calculate Beta
+			B_dr_a = data.radius / DOTS_Bubble_Data.CF;
+			B_dvis_a = 4f * DOTS_Bubble_Data.MU;
+			B_dvis_b = DOTS_Bubble_Data.RHO_WATER * math.pow(data.radius, 2);
+			B_phi_a = 16f * DOTS_Bubble_Data.GTH * DOTS_Bubble_Data.G;
+			B_phi_B = 9f * math.pow((DOTS_Bubble_Data.GAMMA - 1), 2);
+			B_dth_a = (3f * DOTS_Bubble_Data.GAMMA - 1f) /
+					 (3f * (DOTS_Bubble_Data.GAMMA - 1));
+		}
+		public float JetForcing(float t)
+		{
+			if (t < 0 || t > cutoff)
+				return 0;
+			return jval_initial * math.pow(t, 2);
+		}
+		public static float BubbleTerminalVelocity(float r)
+		{
+
+			float d = 2f * r;
+
+			// eq 2
+			float vtpot = 1f / 36f * del_rho * DOTS_Bubble_Data.G * math.pow(d, 2) / DOTS_Bubble_Data.MU;
+
+			// eq 6
+			float vt1 = vtpot * math.sqrt(1f + 0.73667f * math.sqrt(DOTS_Bubble_Data.G * d) / vtpot);
+
+			// eq 8
+			float vt2 = math.sqrt(3f * DOTS_Bubble_Data.SIGMA / DOTS_Bubble_Data.RHO_WATER / d + DOTS_Bubble_Data.G * d * del_rho / 2f / DOTS_Bubble_Data.RHO_WATER);
+
+			// eq 1
+			float vt = 1f / math.sqrt(1 / math.pow(vt1, 2) + 1f / math.pow(vt2, 2));
+
+
+			return vt;
+		}
+		public static float ActualFreq(DOTS_Bubble_Data.InterfaceType interface_type,float radius,float depth,float v0,float AF_omega_a)
+		{
+			float bubbleCapacitance = BubbleCapacitance(interface_type, radius, depth);
+
+			float omega = math.sqrt( bubbleCapacitance * AF_omega_a);
+
+			return omega / 2f / math.PI;
+		}
+		public static float BubbleCapacitance(DOTS_Bubble_Data.InterfaceType interface_type, float radius, float depth)
+		{
+			if (interface_type == DOTS_Bubble_Data.InterfaceType.Rigid)
+				return radius / (1f - radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
+			else // Rigid interface
+				return radius / (1f + radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
+		}
+		public static float CalcBeta(float w0,float B_dr_a,float B_dvis_a,float B_dvis_b,float B_phi_a,float B_phi_b,
+			float B_dth_a)
+		{
+
+			float dr = w0 * B_dr_a;
+			float dvis = B_dvis_a / ( w0 * B_dvis_b);
+
+			float phi = B_phi_a / (B_phi_b * w0);
+
+			float dth = 2f * ( math.sqrt(phi - 3f) - B_dth_a  ) / (phi - 4);
+
+			float dtotal = dr + dvis + dth;
+
+
+			return w0 * dtotal / math.sqrt(math.pow(dtotal, 2) + 4f);
+		}
+		public float2 system(float2 Y, float t)
+		{
+			//[f'; f]
+			float f = JetForcing((float)t - 0.1f);
+
+			float d = depth;
+
+			if (movingType == DOTS_Bubble_Data.MovingType.Rising && t >= 0.1f)
+			{
+				// rising bubble, calc depth
+
+				d = math.max(rising_d_m1, depth - ((float)t - 0.1f) * vt);
+
+			}
+			//if we let it run too long and the values get very small,
+			// the scipy integrator has problems. Might be setting the time step too
+			// small? So just exit when the oscillator loses enough energy
+			if (t > 0.11f && math.sqrt(math.pow(Y[0], 2) + math.pow(Y[1], 2)) < 1e-15f)
+			{
+				return 0;
+			}
+			else
+			{
+				float w0 = ActualFreq(interfaceType, radius, d,AF_v0,AF_omega_a) * AF_b;
+
+				float m = k / math.pow(w0, 2);
+
+				float beta = CalcBeta( w0,B_dr_a,B_dvis_a,B_dvis_b,B_phi_a,B_phi_B,B_dth_a);
+
+				float acc = f / m - 2 * beta * (float)Y[0] - math.pow(w0, 2) * (float)Y[1];
+
+				if (float.IsNaN(acc))
+				{
+					//		Debug.Log("DETECTED NAN! f: " + f + ", m: " + m + ", w0: " + w0 + ", beta: " + beta + ", t: " + t + ", y[0]=" + Y[0] + ", y[1]=" + Y[1]);
+				}
+				//	if (acc != 0 || Y[0] != 0 || Y[1] != 0)
+				//		Debug.Log($"{acc},{Y[0]},{Y[1]}");
+				return new float2(acc, Y[0]);
+			}
+		}
+
+	}
+	[BurstCompile]
     private struct runge_kutta4_single
     {
-        private int N;
+        private int N,internal_N;
+		[NativeDisableParallelForRestriction]
         private NativeArray<float2> x_tmp, k1, k2, k3, k4;
-        private float dt, dt2, dt3, dt6;
+        [NativeDisableParallelForRestriction]
+		public NativeArray<float2> x;
+
+		[NativeDisableParallelForRestriction]
+		public NativeArray<BubbleAdditionalInfo> bubbleAdditionalInfos;
+        private float dt, dt2, dt6;
         public runge_kutta4_single(int size_n, float start, float end, Allocator allocator)
         {
             N = size_n;
@@ -583,20 +780,83 @@ public partial class RungeKuttaBubbleSystem : SystemBase
             k2 = new NativeArray<float2>(size_n, allocator);
             k3 = new NativeArray<float2>(size_n, allocator);
             k4 = new NativeArray<float2>(size_n, allocator);
+            x = new NativeArray<float2>(size_n, allocator);
+			bubbleAdditionalInfos = new NativeList<BubbleAdditionalInfo>(allocator);
+			internal_N = 0;
             dt = (end - start) / (N - 1);
             dt2 = dt / 2;
-            dt3 = dt / 3;
             dt6 = dt / 6;
         }
+		public void Clear()
+        {
+		//	for (int i = 0; i < x.Length; i++)
+		//		x[i] = 0;
+		//	bubbleStartEnd.Clear();
+		//	dts.Clear();
+        }
+		public void Initialize_ST_DT(int size, Allocator allocator)
+        {
+			bubbleAdditionalInfos = new NativeArray<BubbleAdditionalInfo>(size, allocator);
+        }
+		public void SetData(int index,int n ,float start,float end)
+        {
+			var bubbleAdditionalInfo = bubbleAdditionalInfos.Length == 0 ? new BubbleAdditionalInfo() : bubbleAdditionalInfos[bubbleAdditionalInfos.Length - 1];
+			if (n + bubbleAdditionalInfo.end < N)
+			{
+				int s = bubbleAdditionalInfos.Length == 0 ? 0 : bubbleAdditionalInfo.end;
+				x[s] = 0;
+				k1[s] = 0;
+				k2[s] = 0;
+				k3[s] = 0;
+				k4[s] = 0;
+				x_tmp[s] = 0;
+				int2 se = new int2(s, s + n);
+				float _dt = (end - start) / (n - 1);
+				bubbleAdditionalInfo = new BubbleAdditionalInfo
+				{
+					start = s,
+					end = s + n,
+					dt = _dt,
+					dt2 = _dt / 2,
+					dt6 = _dt / 6
+				};
+				bubbleAdditionalInfos[index] = bubbleAdditionalInfo;
+			//	bubbleStartEnd[index] = (se);
+			//	dts[index] = (new float3(_dt, _dt / 2, _dt / 6));
+
+			}
+			else Debug.LogError("runge_kutta_single: Cannot Add Data, n exceeds allocated data");
+		}
+	/*	public void AddData(int n,float start,float end)
+        {
+			int2 lastStartEnd = bubbleStartEnd.Length == 0 ? new int2(0,0) : bubbleStartEnd[bubbleStartEnd.Length - 1];
+			if (n + lastStartEnd.y < N)
+			{
+				int s = bubbleStartEnd.Length == 0 ? 0 : lastStartEnd.y;
+				x[s] = 0;
+				k1[s] = 0;
+				k2[s] = 0;
+				k3[s] = 0;
+				k4[s] = 0;
+				x_tmp[s] = 0;
+				int2 se = new int2(s, s + n);
+				float _dt = (end - start) / (n - 1);
+				bubbleStartEnd.Add(se);
+				dts.Add(new float3(_dt,_dt/2,_dt/6));
+
+			}
+			else Debug.LogError("runge_kutta_single: Cannot Add Data, n exceeds allocated data");
+        }*/
         public void Dispose()
         {
             k1.Dispose();
             k2.Dispose();
             k3.Dispose();
             k4.Dispose();
+			x.Dispose();
             x_tmp.Dispose();
         }
-		public void GenerateBubbleWaveForm(ref DOTS_Bubble_Data data, NativeArray<float2> raw_data, 
+		public void GenerateBubbleWaveForm(ref DOTS_Bubble_Data data,NativeArray<float2> raw_data,
 			bool convert_to_wav_format = true, bool useFromTo = false)
 		{
 		//	Debug.Log($"{data.depth},{data.radius},{data.from},{data.to},{data.steps},{data.start},{data.end},{(byte)data.m_interfacetype},{(byte)data.m_movingtype}");
@@ -608,7 +868,7 @@ public partial class RungeKuttaBubbleSystem : SystemBase
 			
 			if (convert_to_wav_format)
 			{
-				NativeArray<float> tmp = DOTS_Bubble_Data.ApplyWavFormat(raw_data,Allocator.Temp);
+				NativeArray<float> tmp = DOTS_Bubble_Data.ApplyWavFormat(ref data,raw_data,Allocator.Temp);
 				for (int i = 0; i < tmp.Length; i++)
 				{
 					raw_data[i] = tmp[i];
@@ -653,9 +913,9 @@ public partial class RungeKuttaBubbleSystem : SystemBase
 		}
 			IsInitialized = true;*/
 		}
-
-		float2 system(DOTS_Bubble_Data data, float2 Y,float t)
-        {
+		
+		float2 system(DOTS_Bubble_Data data, float2 Y, float t)
+		{
 			//[f'; f]
 			float f = DOTS_Bubble_Data.JetForcing(data.radius, (float)t - 0.1f);
 
@@ -697,27 +957,18 @@ public partial class RungeKuttaBubbleSystem : SystemBase
 				{
 					//		Debug.Log("DETECTED NAN! f: " + f + ", m: " + m + ", w0: " + w0 + ", beta: " + beta + ", t: " + t + ", y[0]=" + Y[0] + ", y[1]=" + Y[1]);
 				}
-			//	if (acc != 0 || Y[0] != 0 || Y[1] != 0)
-			//		Debug.Log($"{acc},{Y[0]},{Y[1]}");
-				return new float2( acc, Y[0] );
+				//	if (acc != 0 || Y[0] != 0 || Y[1] != 0)
+				//		Debug.Log($"{acc},{Y[0]},{Y[1]}");
+				return new float2(acc, Y[0]);
 			}
 		}
-        // assum x = [1...n]
-        float system(float x, float t)
+
+
+
+		public void do_step2(DOTS_Bubble_Data data,NativeArray<float2> output, float t)
         {
-            return x * x + t;
-        }
-        public void do_step2(DOTS_Bubble_Data data,
-            NativeArray<float2> x, float t)
-        {
-            for (int i = 1; i < x.Length; i++)
+            for (int i = 1; i < internal_N; i++)
             {
-				/*   k1[i] = system(x[i - 1], t);
-				   k2[i] = system(x[i - 1] + k1[i] * dt2, t + dt2);
-				   k3[i] = system(x[i - 1] + k2[i] * dt2, t + dt2);
-				   k4[i] = system(x[i - 1] + k3[i] * dt, t + dt);
-				   x[i] = x[i - 1] + dt6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
-				   t += dt;*/
                 k1[i] = system(data,x[i - 1], t);
                 k2[i] = system(data,x[i - 1] + k1[i] * dt2,  t + dt2);
                 k3[i] = system(data,x[i - 1] + k2[i] * dt2,  t + dt2);
@@ -725,6 +976,39 @@ public partial class RungeKuttaBubbleSystem : SystemBase
                 x[i] = x[i - 1] + dt6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
                 t += dt;
             }
+        }
+		
+		///////////////////////////////////////////////////
+		public void do_step3(DOTS_Step_Calculations data, float t, int index)
+		{
+			//	if (index < bubbleStartEnd.Length)
+			//	{
+			var bInfo = bubbleAdditionalInfos[index];
+			for (int i = bInfo.start + 1; i < bInfo.end; i++)
+			{
+				k1[i] = data.system(x[i - 1], t);
+				k2[i] = data.system(x[i - 1] + k1[i] * bInfo.dt2, t + bInfo.dt2);
+					k3[i] = data.system( x[i - 1] + k2[i] * bInfo.dt2, t + bInfo.dt2);
+					k4[i] = data.system( x[i - 1] + k3[i] * bInfo.dt, t + bInfo.dt);
+				x[i] = x[i - 1] + bInfo.dt6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+				t += bInfo.dt;
+			}
+			//	}
+			//	else Debug.LogError($"runge_kutta_single: given index exceeds prepared datas {index}:{bubbleStartEnd.Length}");
+
+		}
+	
+		// Bubble Related Stuff
+		public void SetParams(int n,float start,float end)
+        {
+			if (n < N)
+			{
+				internal_N = n; 
+				dt = (end - start) / (N - 1);
+				dt2 = dt / 2;
+				dt6 = dt / 6;
+			}
+			else Debug.LogError($"runge_kutta_single: given N exceeds already Allocated NativeArrays of size {N}");
         }
     }
 
@@ -740,23 +1024,94 @@ public partial class RungeKuttaBubbleSystem : SystemBase
             rk.do_step2(data,input, 0);
         }
     }
+    [BurstCompile]
+    private struct ExecuteOnMultipleCores : IJobParallelFor
+    {
+		[NativeDisableParallelForRestriction]
+		public NativeArray<DOTS_Bubble_Data> bubbles;
+		[NativeDisableParallelForRestriction]
+		public NativeArray<DOTS_Step_Calculations> steps;
+		public runge_kutta4_single rk;
+		public bool convert_to_wave_format;
+		public void Execute(int index)
+        {
+			steps[index] = new DOTS_Step_Calculations(bubbles[index]);
+			rk.SetData(index, bubbles[index].steps, bubbles[index].start, bubbles[index].end);
+			rk.do_step3(steps[index], 0, index);
+			if (convert_to_wave_format)
+			{
+				DOTS_Bubble_Data.ApplyWavFormat(rk.x,rk.bubbleAdditionalInfos[index]);
+			}
+		}
+    }
+	[BurstCompile]
+    private struct SetupBubbleDataOnMultipleCores : IJobParallelFor
+    {
+		[NativeDisableParallelForRestriction]
+		public NativeArray<DOTS_Bubble_Data> bubbles;
+		[NativeDisableParallelForRestriction]
+		public NativeArray<DOTS_Step_Calculations> steps;
+		public runge_kutta4_single rk;
+        public void Execute(int index)
+        {
+			steps[index] = new DOTS_Step_Calculations(bubbles[index]);
+			rk.SetData(index, bubbles[index].steps, bubbles[index].start, bubbles[index].end);
+        }
+    }
 
+    runge_kutta4_single rk;
+	int rk_hard_cap = 50000;
+	int rk_bubble_hard_cap = 100;
+	EntityQuery BubbleRequestQuery;
+	NativeArray<DOTS_Step_Calculations> step_calculations;
+	Play_Bubble_Sound playBubbleSoundSystem;
+    protected override void OnCreate()
+    {
+		playBubbleSoundSystem = World.GetExistingSystem<Play_Bubble_Sound>();
+		rk = new runge_kutta4_single(rk_hard_cap,0,1,Allocator.Persistent);
+		BubbleRequestQuery = GetEntityQuery(typeof(BubbleGenerationRequest),typeof(DOTS_Bubble_Data));
+		step_calculations = new NativeArray<DOTS_Step_Calculations>(rk_bubble_hard_cap, Allocator.Persistent);
+		rk.Initialize_ST_DT(rk_bubble_hard_cap, Allocator.Persistent);
+    }
     protected override void OnDestroy()
     {
-      
+		rk.Dispose();
+		step_calculations.Dispose();
     }
 
     protected override void OnUpdate()
     {
-		Dependency = Entities
+		if(BubbleRequestQuery.CalculateEntityCount() > 0)
+        {
+			var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
+			var entities = BubbleRequestQuery.ToEntityArray(Allocator.TempJob);
+			
+			Dependency = new ExecuteOnMultipleCores
+			{
+				rk = rk,
+				bubbles = bubbles,
+				steps = step_calculations,
+				convert_to_wave_format = true
+			}.Schedule(bubbles.Length,1,Dependency);
+			Dependency.Complete();
+
+			EntityManager.RemoveComponent(entities,typeof(BubbleGenerationRequest));
+			entities.Dispose();
+			bubbles.Dispose();
+			playBubbleSoundSystem.bubbleAdditionalInfos = rk.bubbleAdditionalInfos;
+			playBubbleSoundSystem.bubble_queue = rk.x;
+		}
+
+	/*	Dependency = Entities
 			.WithName("Bubble_Generation_System")
 			.WithBurst()
 			.ForEach((ref DOTS_Bubble_Data data, ref DynamicBuffer<DB_Float> wave_data) => {
 				if (!data.IsInitialized)
 				{
-					var rk = new runge_kutta4_single(data.steps, 0, 1, Allocator.Temp);
-					NativeArray<float2> w_data = new NativeArray<float2>(wave_data.Length, Allocator.Temp);
-					rk.GenerateBubbleWaveForm(ref data, w_data, false);
+					rk.SetParams(data.steps, 0, 1);
+				//	rk.ClearInput();
+					NativeArray<float2> w_data = new NativeArray<float2>(data.steps, Allocator.Temp);
+					rk.GenerateBubbleWaveForm(ref data, w_data,true);
 					//	string s = "";
 					//	for (int i = 0; i < w_data.Length; i++)
 					//		s += w_data[i].y + ",";
@@ -766,7 +1121,7 @@ public partial class RungeKuttaBubbleSystem : SystemBase
 				}
 			}).ScheduleParallel(Dependency);
 		Dependency.Complete();
-		
+		*/
     }
 }
 [UpdateAfter(typeof(RungeKuttaBubbleSystem))]
@@ -777,75 +1132,162 @@ public partial class Play_Bubble_Sound : SystemBase
 	private AudioClip clip;
 	public AudioSource audioSource;
 	public int sampleRate = 48000;
-	float[] current_bubble;
+	float[] liveBubbleData;
+	float2 minmax = new float2();
+	bool liveBubbleDataDisabled = true;
+	internal NativeArray<float2> bubble_queue;
+	internal NativeArray<BubbleAdditionalInfo> bubbleAdditionalInfos;
 	protected override void OnCreate()
 	{
 		Bubble_Query = GetEntityQuery(typeof(DOTS_Bubble_Data));
+		bubbleAdditionalInfos = new NativeArray<BubbleAdditionalInfo>();
 	}
-    protected override void OnUpdate()
+    protected override void OnStartRunning()
+	{
+		liveBubbleData = new float[sampleRate];
+		SetupBubbleSound("Test",1,sampleRate,true);
+	}
+    protected override void OnDestroy()
     {
+		bubbleAdditionalInfos.Dispose();
+		bubble_queue.Dispose();
+    }
+    protected override void OnUpdate()
+	{
+		if(bubbleAdditionalInfos.Length > 0)
+        {
+			var queue = bubble_queue.ToArray();
+			float[] wave_data = new float[bubbleAdditionalInfos[0].end-bubbleAdditionalInfos[0].start];
+			for (int i = bubbleAdditionalInfos[0].start; i < bubbleAdditionalInfos[0].end; i++)
+				wave_data[i - bubbleAdditionalInfos[0].start] = queue[i].y;
+			SetLiveBubbleData(wave_data);
+			bubble_queue = new NativeArray<float2>(0,Allocator.Persistent);
+			bubbleAdditionalInfos = new NativeArray<BubbleAdditionalInfo>(0, Allocator.Persistent);
+        }
+		/*
 		var deltaTime = Time.DeltaTime;
 		int a = Bubble_Query.CalculateEntityCount();
-		if(a > 0)
-        {
+		if (a > 0)
+		{
 			BufferFromEntity<DB_Float> Get_buf = GetBufferFromEntity<DB_Float>(true);
 			ComponentDataFromEntity<DOTS_Bubble_Data> GetBubbleData = GetComponentDataFromEntity<DOTS_Bubble_Data>();
 			NativeArray<Entity> entities = Bubble_Query.ToEntityArray(Allocator.TempJob);
 
-			for(int i = 0; i < entities.Length; i++)
+			for (int i = 0; i < entities.Length; i++)
 			{
 				var bubble_data = GetBubbleData[entities[i]];
 				if (bubble_data.timeLeft <= 0)
 				{
 					float[] wave_data = DB_Float.ToArray(Get_buf[entities[i]], true);
-					PlayBubbleSound("Test", wave_data, 1, sampleRate, true);
+						SetLiveBubbleData(wave_data);
+				//	liveBubbleData = wave_data;
+				//	minmax = bubble_data.minmax;
+				//	saveBubbleData();
 					this.EntityManager.DestroyEntity(entities[i]);
-                }
-                else
-                {
+				}
+				else
+				{
 					bubble_data.timeLeft -= deltaTime;
 					GetBubbleData[entities[i]] = bubble_data;
 				}
 			}
 			entities.Dispose();
-        }
-    }
-	public void PlayBubbleSound(string name, float[] wave_data, int channels = 1, int sampleRate = 41000, bool stream = false)
-	{
-		Debug.Log("Playing the sound!");
-		current_bubble = wave_data;
-		clip = AudioClip.Create(name, wave_data.Length, channels, sampleRate, stream, OnAudioRead/*,OnAudioSetPosition*/);
-		//	clip.SetData(wave_data, 0);
-		PlayBubbleSound(clip);
-
-
-
+		}*/
 	}
-	public void PlayBubbleSound(AudioClip audioClip)
+	private void SetupBubbleSound(string name, int channels = 1, int sampleRate = 41000, bool stream = true)
 	{
+		if (clip == null)
+			clip = AudioClip.Create(name, sampleRate, channels, sampleRate, stream, OnAudioRead/*,OnAudioSetPosition*/);
 		if (audioSource != null)
 		{
-			audioSource.clip = audioClip;
+			audioSource.clip = clip;
 			audioSource.Play();
 		}
-		else Debug.LogError("somehow this audio source is null!");
+	}
+	private void SetLiveBubbleData(float[] new_data)
+    {
+		Debug.Log("Setting New Bubble Data!");
+	/*	string s = "";
+		for (int i = 0; i < new_data.Length; i++)
+			s += new_data[i];
+		Debug.Log(s);*/
+		currentStep = 0;
+		stepsLeft = new_data.Length;
+		liveBubbleData = new_data;
+
+	//	for (int i = 0; i < new_data.Length; i++)
+	//		Debug.Log($"A: {liveBubbleData[i]}, {new_data[i]}");
+			/*	for (int i = 0; i < new_data.Length; i++)
+					liveBubbleData[i] = new_data[i];
+				for (int i = new_data.Length; i < liveBubbleData.Length; i++)
+					liveBubbleData[i] = 0;*/
+			liveBubbleDataDisabled = false;
+    }
+	private void saveBubbleData()
+    {
+		var path = Application.dataPath + "/Wave_Outputs/";
+		WaveFormat waveFormat = new WaveFormat(liveBubbleData.Length, 1);
+		if (!Directory.Exists(path))
+			Directory.CreateDirectory(path);
+		//	if(!File.Exists(path + SoundFileName + ".wav"))
+		//		File.Create(path + SoundFileName + ".wav");
+
+		using (WaveFileWriter writer = new WaveFileWriter(path + "test" + ".wav", waveFormat))
+		{
+			writer.WriteSamples(liveBubbleData, 0, liveBubbleData.Length);
+		}
+		Debug.Log("saved file to" + Application.dataPath + "/Wav_Outputs/test.wav");
+
+	}
+	private void ClearLiveBubbleData()
+    {
+		liveBubbleDataDisabled = true;
+		
+		for (int i = 0; i < liveBubbleData.Length; i++)
+			liveBubbleData[i] = 0;
+
 	}
 	int currentStep = 0;
+	int stepsLeft = 0;
+	int tmpMaxStep = 0;
 	void OnAudioRead(float[] data)
 	{
-		//	Debug.Log($"data length: {data.Length}, currentStep {currentStep}," +
-		//		$" max {bubbles[0].formatted_data.Length}");
-		int total = current_bubble.Length - currentStep - data.Length;
+		if (!liveBubbleDataDisabled)
+		{
+			tmpMaxStep = math.clamp(stepsLeft, 0, data.Length);
+			for (int i = 0; i < tmpMaxStep; i++)
+			{
+				//	data[i] = math.remap( minmax.x,minmax.y,-1,1,liveBubbleData[currentStep + i]);
+				data[i] = liveBubbleData[currentStep + i];// math.clamp(, -1,1);
+
+			}
+			if (stepsLeft < data.Length)
+			{
+				Debug.Log("Clearing Bubble Data!");
+				// reached end of data stream
+				ClearLiveBubbleData();
+				stepsLeft = 0;
+			}
+			else
+			{
+				currentStep += data.Length;
+				stepsLeft -= data.Length;
+			}
+		}
+
+		/*
+		int total = liveBubbleData.Length - currentStep - data.Length;
 		if (total > data.Length) total = data.Length;
-		else if (total <= 0 && currentStep < current_bubble.Length)
+		else if (total <= 0 && currentStep < liveBubbleData.Length)
 			total = data.Length + total;
 
-		//if (currentStep + data.Length >= bubbles[0].formatted_data.Length)
 		if (total <= 0)
 		{
-			//		Debug.Log("exceeded data lnegth, no more!");
+		//	Debug.Log("exceeded data lnegth, no more!");
 			for (int i = 0; i < data.Length; i++)
+			{
 				data[i] = 0;
+			}
 			return;
 		}
 		else
@@ -854,22 +1296,16 @@ public partial class Play_Bubble_Sound : SystemBase
 			for (int i = 0; i < total; i++)
 			{
 				float value = 0;
-				for (int j = 0; j < current_bubble.Length; j++)
-					value += current_bubble[currentStep + i];
+				for (int j = 0; j < liveBubbleData.Length; j++)
+					value += liveBubbleData[currentStep + i];
 				data[i] = ClampToValidRange(value);
 
-			}/*
-		if (currentStep + data.Length >= bubbles[0].formatted_data.Length)
-		{
-			Debug.Log("Exceeded data length");
-			currentStep = bubbles[0].formatted_data.Length;
-		}
-		else*/
+			}	
 			currentStep += data.Length;
 		}
 		//	watch.Stop();
 		//	Debug.Log("Combining " + bubbles.Length + " bubbles took " + watch.ElapsedMilliseconds + "ms");
-		//	watch.Reset();
+		//	watch.Reset();*/
 	}
 
 	void OnAudioSetPosition(int newPosition)
