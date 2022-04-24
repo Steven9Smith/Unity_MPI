@@ -8,4 +8,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ML_Agent_Demo/Test.unity
     guid: 32fd59720ccd8c940930243fad9a6429
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 6d94717dd7405a046ba7c112ab661e3f, type: 2}

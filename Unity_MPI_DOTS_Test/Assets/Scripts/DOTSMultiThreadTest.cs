@@ -9,11 +9,10 @@ using MathNet.Numerics.OdeSolvers;
 using MathNet.Numerics.LinearAlgebra;
 using Unity.Mathematics;
 using Unity.Burst;
-
+[DisableAutoCreation]
 public class DOTSMultiThreadTest : MonoBehaviour
 {
     public static int N = 1;
-    public static int max_for_display = 10;
     public static int iterations = 0;
     // Start is called before the first frame update
     void Start()
@@ -29,6 +28,7 @@ public class DOTSMultiThreadTest : MonoBehaviour
 }
 public struct RK_Tag : IComponentData { }
 [UpdateAfter(typeof(RungeKuttaSystem))]
+[DisableAutoCreation]
 public partial class MathNetRungeKutta : SystemBase
 {
     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
@@ -71,6 +71,7 @@ public partial class MathNetRungeKutta : SystemBase
     }
 }
 [UpdateAfter(typeof(MathNetRungeKutta))]
+[DisableAutoCreation]
 public partial class RungeKuttaSingleJob : SystemBase
 {
     private struct runge_kutta4_single
@@ -244,6 +245,7 @@ public partial class RungeKuttaSingleJob : SystemBase
     }
 }
 [UpdateAfter(typeof(RungeKuttaSingleJob))]
+[DisableAutoCreation]
 public partial class RungeKutaParallel_A : SystemBase
 {
     NativeArray<double> input;
@@ -602,6 +604,8 @@ public partial class RungeKutaParallel_A : SystemBase
     }
 
 }
+
+[DisableAutoCreation]
 public partial class RungeKuttaSystem : SystemBase
 {
     private struct runge_kutta4_p

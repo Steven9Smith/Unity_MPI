@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 484218848}
   - component: {fileID: 484218847}
-  - component: {fileID: 484218849}
   m_Layer: 0
   m_Name: Bubble
   m_TagString: Untagged
@@ -158,11 +157,14 @@ MonoBehaviour:
     m_interfacetype: 1
     radius: 1
     depth: 1
+    start: 0
+    end: 0
     steps: 96000
     from: 0
     to: 96000
     IsInitialized: 0
     formatted_data: []
+  sampleRate: 41000
   PlayOnStart: 1
   SaveToFile: 0
   SoundFileName: pop
@@ -180,29 +182,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &484218849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 484218846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 034e2de0050279d46a2d2d8cd9aa8f17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bubbles:
-  - m_movingtype: 0
-    m_interfacetype: 1
-    radius: 1
-    depth: 1
-    steps: 96000
-    IsInitialized: 0
-    formatted_data: []
-  PlayOnStart: 1
-  SaveToFile: 0
-  SoundFileName: pop
 --- !u!1 &1580335150
 GameObject:
   m_ObjectHideFlags: 0
