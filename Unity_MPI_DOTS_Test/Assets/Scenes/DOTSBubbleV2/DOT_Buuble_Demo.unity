@@ -369,28 +369,51 @@ MonoBehaviour:
   bubbles:
   - m_movingtype: 1
     m_interfacetype: 1
-    radius: 1.41
+    radius: 1
     depth: 1
-    start: 0
-    end: 0.5
+    startTime: 0
+    endTime: 1
     steps: 24000
-    from: 0
-    to: 0
     IsInitialized: 0
     timeLeft: 1
   - m_movingtype: 1
     m_interfacetype: 1
-    radius: 4.69
+    radius: 2.5
     depth: 1
-    start: 0
-    end: 0.5
+    startTime: 0
+    endTime: 1
     steps: 24000
-    from: 0
-    to: 0
+    IsInitialized: 0
+    timeLeft: 1
+  - m_movingtype: 1
+    m_interfacetype: 1
+    radius: 5
+    depth: 1
+    startTime: 0
+    endTime: 1
+    steps: 24000
+    IsInitialized: 0
+    timeLeft: 1
+  - m_movingtype: 1
+    m_interfacetype: 1
+    radius: 12
+    depth: 1
+    startTime: 0
+    endTime: 1
+    steps: 24000
+    IsInitialized: 0
+    timeLeft: 1
+  - m_movingtype: 1
+    m_interfacetype: 1
+    radius: 16
+    depth: 1
+    startTime: 0
+    endTime: 1
+    steps: 24000
     IsInitialized: 0
     timeLeft: 1
   sampleRate: 48000
-  PlayOnStart: 1
+  PlayOnStart: 0
   SaveToFile: 0
   SoundFileName: pop
 --- !u!4 &1642741469

@@ -288,13 +288,13 @@ public struct Float_BubbleSoundDataCondensedDynamic
 	}
 	public static Vector<double>[] CalculateRawSound(DOTS_Bubble_Data data, bool fastCalculation = false)
 	{
-		Debug.Log($"P|{data.depth},{data.radius},{data.from},{data.to},{data.steps},{data.start},{data.end},{(byte)data.m_interfacetype},{(byte)data.m_movingtype}");
+		Debug.Log($"P|{data.depth},{data.radius},{data.steps},{data.startTime},{data.endTime},{(byte)data.m_interfacetype},{(byte)data.m_movingtype}");
 
 		float m_depth = data.depth;
 		float m_radius = data.radius;
 		// Integrate the bubble sound into a buffer
-		var sol = fastCalculation ? RungeKutta.SecondOrder(DEFAULT_INITIAL_VALUE, data.start, data.end, data.steps, DerivativeMaker())
-			: RungeKutta.FourthOrder(DEFAULT_INITIAL_VALUE, data.start, data.end, data.steps, DerivativeMaker());
+		var sol = fastCalculation ? RungeKutta.SecondOrder(DEFAULT_INITIAL_VALUE, data.startTime, data.endTime, data.steps, DerivativeMaker())
+			: RungeKutta.FourthOrder(DEFAULT_INITIAL_VALUE, data.startTime, data.endTime, data.steps, DerivativeMaker());
 		Func<double, Vector<double>, Vector<double>> DerivativeMaker()
 		{
 			return (t, Y) =>

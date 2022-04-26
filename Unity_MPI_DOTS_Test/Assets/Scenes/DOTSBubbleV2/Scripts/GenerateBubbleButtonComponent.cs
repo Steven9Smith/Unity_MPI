@@ -21,7 +21,7 @@ public class GenerateBubbleButtonComponent : MonoBehaviour
 
     public AudioSource audioSource;
 
-    private PlayBubbleSoundSystem play_bubble_sound_system;
+    private DynamicRungeKuttaBubbleSystem play_bubble_sound_system;
     private EntityManager em;
     private EntityArchetype BubbleArchtype;
     private int sampleRate = 48000;
@@ -66,7 +66,7 @@ public class GenerateBubbleButtonComponent : MonoBehaviour
         Debug.LogWarning("Getting Play Bubble System");
         em = World.DefaultGameObjectInjectionWorld.EntityManager;
         BubbleArchtype = em.CreateArchetype(typeof(DOTS_Bubble_Data), typeof(BubbleGenerationRequest));
-        play_bubble_sound_system = World.DefaultGameObjectInjectionWorld.GetExistingSystem<PlayBubbleSoundSystem>();
+        play_bubble_sound_system = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<DynamicRungeKuttaBubbleSystem>();
         if (play_bubble_sound_system != null)
         {
             play_bubble_sound_system.audioSource = audioSource;
@@ -81,7 +81,7 @@ public class GenerateBubbleButtonComponent : MonoBehaviour
         {
             em.SetComponentData(entities[j], new DOTS_Bubble_Data((DOTS_Bubble_Data.InterfaceType)InputInterface.value,
                 (DOTS_Bubble_Data.MovingType)InputMoving.value,float.Parse(InputRadius.text),
-               float.Parse(InputDepth.text), int.Parse(InputFrom.text), int.Parse(InputTo.text),
+               float.Parse(InputDepth.text),/* int.Parse(InputFrom.text), int.Parse(InputTo.text),*/
                float.Parse(InputStart.text), float.Parse(InputEnd.text), int.Parse(InputSteps.text), float.Parse(InputTimeLeft.text),
                entities[j])
             );
