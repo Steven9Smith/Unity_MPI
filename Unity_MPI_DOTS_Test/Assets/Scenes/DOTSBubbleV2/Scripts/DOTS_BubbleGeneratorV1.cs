@@ -15,6 +15,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     public DOTS_Bubble_Data[] bubbles;
     public int sampleRate = 41000;
     public bool PlayOnStart = true;
+	[SerializeField]
 	public ComputeShader shader;
     [Tooltip("Set to true to save to a file")]
     public bool SaveToFile = false;
@@ -29,7 +30,6 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = this.gameObject.AddComponent<AudioSource>();
 		audioSource.loop = true;
-
 
         //	var a = AudioClip.Create("Test", wav_data.Length, 1, 41000, false);
         //	a.SetData(wav_data, 0);
@@ -889,12 +889,15 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 		bubbleQueueInfo = new BubbleQueueInfo(ALLOWED_BUBBLES_PER_FRAME, AudioSourceDataLimit, Allocator.Persistent);
 		tmpData = new NativeArray<float>(2, Allocator.Persistent);
 		tmpData[1] = 6666666666;// 1/1.5E-10 = 6666666666
+		buffer = new ComputeBuffer(1000, sizeof(float) * 1000);
 	}
     protected override void OnDestroy()
     {
 		bubbleQueueInfo.Dispose();
 		PostProcessingOutput.Dispose();
 		tmpData.Dispose();
+		buffer.Release();
+		buffer = null;
 	}
 	protected override void OnStartRunning()
 	{
@@ -906,7 +909,6 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
         {
 			if (BubbleRequestQuery.CalculateEntityCount() > 0)
 			{
-				ComputeBuffer
 				// collected the new bubble requests
 				var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
 				// for debugging purposes only!

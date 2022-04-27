@@ -1,14 +1,18 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSMain
+#pragma kernel AcousticBubbleGeneratorV1
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-RWTexture2D<float4> Result;
+#define PI 3.14159265358979323846
 
-[numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+RWStructuredBuffer<float4> dts;
+RWStructuredBuffer<int4> stepInformation;
+int size;
+
+[numthreads(64,1,1)]
+void AcousticBubbleGeneratorV1 (uint3 id : SV_DispatchThreadID)
 {
-    // TODO: insert actual code here!
+    if (id.x < size)
+    {
+        
+    }
 
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
 }
