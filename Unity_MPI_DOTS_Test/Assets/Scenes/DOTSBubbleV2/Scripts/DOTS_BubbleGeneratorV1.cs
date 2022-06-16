@@ -1,5 +1,5 @@
 
-#define ALWAYS_RUN_BUBBLE_SYSTEM
+//#define ALWAYS_RUN_BUBBLE_SYSTEM
 using NAudio.Wave;
 using System.Collections.Generic;
 using System.IO;
@@ -15,12 +15,13 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     public DOTS_Bubble_Data[] bubbles;
     public int sampleRate = 41000;
     public bool PlayOnStart = true;
-	[SerializeField]
 	public ComputeShader shader;
     [Tooltip("Set to true to save to a file")]
     public bool SaveToFile = false;
     public string SoundFileName = "pop";
     private AudioSource audioSource;
+	public UnityEngine.UI.Button Button;
+	public UnityEngine.UI.Button UseGPUToggle;
   //  private AudioClip clip;
   //  int currentStep = 0;
   //  System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
@@ -30,6 +31,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = this.gameObject.AddComponent<AudioSource>();
 		audioSource.loop = true;
+
 
         //	var a = AudioClip.Create("Test", wav_data.Length, 1, 41000, false);
         //	a.SetData(wav_data, 0);
@@ -41,7 +43,23 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+		if (Button == null)
+			Debug.LogError("Missing Button");
+		else
+			Button.onClick.AddListener(ExecuteSoundSythesis);
+		if (UseGPUToggle == null)
+			Debug.LogError("Missing GPU Toggle Button");
+		else
+			UseGPUToggle.onClick.AddListener(ToggleGPUExecution);
 		GetBubbleSystem();
+    }
+	void ExecuteSoundSythesis()
+    {
+		PlayOnStart = true;
+    }
+	void ToggleGPUExecution()
+    {
+		play_bubble_sound_system.UseGPU = play_bubble_sound_system.UseGPU ? false : true;
     }
 	private void GetBubbleSystem()
     {
@@ -66,20 +84,27 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
 		{
             if (PlayOnStart)
             {
-				for(int i = 0; i < bubbles.Length; i++)
-                {
-					NativeArray<Entity> entities = new NativeArray<Entity>(1, Allocator.TempJob);
-					em.CreateEntity(BubbleArchtype,entities);
-					for(int j = 0; j < entities.Length; j++)
-                    {
-						em.SetComponentData(entities[j], new DOTS_Bubble_Data(bubbles[i].m_interfacetype, bubbles[i].m_movingtype, bubbles[i].radius,
-							bubbles[i].depth, /*bubbles[i].from, bubbles[i].to,*/ bubbles[i].startTime, bubbles[i].endTime, bubbles[i].steps, bubbles[i].timeLeft,
-							entities[j])
-						);
-					}
-					entities.Dispose();
+				if (bubbles.Length > DynamicRungeKuttaBubbleSystem.MAX_BUBBLES)
+				{
+					Debug.LogError("Given Amount of Bubbles Excededs the preallocatedLimit, please increase the limit and try again!");
 				}
-				PlayOnStart = false;
+				else
+				{
+					for (int i = 0; i < bubbles.Length; i++)
+					{
+						NativeArray<Entity> entities = new NativeArray<Entity>(1, Allocator.TempJob);
+						em.CreateEntity(BubbleArchtype, entities);
+						for (int j = 0; j < entities.Length; j++)
+						{
+							em.SetComponentData(entities[j], new DOTS_Bubble_Data(bubbles[i].m_interfacetype, bubbles[i].m_movingtype, bubbles[i].radius,
+								bubbles[i].depth, /*bubbles[i].from, bubbles[i].to,*/ bubbles[i].startTime, bubbles[i].endTime, bubbles[i].steps, bubbles[i].timeLeft,
+								entities[j])
+							);
+						}
+						entities.Dispose();
+					}
+					PlayOnStart = false;
+				}
             }
 		}
 		else GetBubbleSystem();
@@ -88,7 +113,7 @@ public class DOTS_BubbleGeneratorV1 : MonoBehaviour
 [BurstCompile]
 public struct BubbleQueueInfo
 {
-	private int N_LIMIT, MAX_ALLOWED_BUBBLES_PER_FRAME;
+	private int N_LIMIT, MAX_MAX_BUBBLES;
 //	[ReadOnly]
 //	private NativeList<DOTS_Bubble_Data> bDatas;
 	[ReadOnly]
@@ -106,9 +131,9 @@ public struct BubbleQueueInfo
 
 	public BubbleQueueInfo(int maxAllowedBubblesPerFrom,int nLimit,Allocator allocator)
     {
-		MAX_ALLOWED_BUBBLES_PER_FRAME = maxAllowedBubblesPerFrom;
+		MAX_MAX_BUBBLES = maxAllowedBubblesPerFrom;
 		N_LIMIT = nLimit;
-		int maxStep = MAX_ALLOWED_BUBBLES_PER_FRAME * nLimit;
+		int maxStep = MAX_MAX_BUBBLES * nLimit;
 	//	bDatas = new NativeList<DOTS_Bubble_Data>(allocator);
 		bCalculations = new NativeList<DOTS_Step_Calculations>(allocator);
 		dt126 = new NativeList<float4>(allocator);
@@ -249,6 +274,213 @@ public struct BubbleQueueInfo
 		}
     }
 }
+[BurstCompile]
+public struct CompressedDOTSBubbleInfo
+{
+	// x = t, y = dt, z = dt/2,w = dt/6
+	public float4 dt126;
+	// x = startIndex, y = endINdex, z = steps, w = stepsLeft
+	public int4 stepsLNNLNM1;
+	public int m_active;
+	public DOTS_Step_Calculations calculations;
+	public bool active {
+		get { return m_active == 1; }
+		set {  m_active = value ? 1 : 0; }
+	}
+		//[	t,			dt,			dt/2,			dt/6
+	//	startIndex	endIndex	steps			stepsLeft
+	//	active
+	//]
+	//public float4x3 dt126_stepsLNNLNM1_active;
+
+}
+
+[BurstCompile]
+public struct BubbleQueueInfoV2
+{
+	public int N_LIMIT, MAX_MAX_BUBBLES;
+	[NativeDisableParallelForRestriction]
+	public NativeArray<CompressedDOTSBubbleInfo> compressedDOTSBubbleInfos;
+	[NativeDisableParallelForRestriction]
+	public NativeArray<float2> x, x_tmp, k1, k2, k3, k4;
+/*	[NativeDisableParallelForRestriction]
+	public NativeArray<DOTS_Step_Calculations> bCalculations;
+	[NativeDisableParallelForRestriction]
+	// x = t, y = dt, z = dt/2,w = dt/6
+	public NativeArray<float4> dt126;
+	[NativeDisableParallelForRestriction]
+	// x = startIndex, y = endINdex, z = steps, w = stepsLeft
+	public NativeArray<int4> stepsLNNLNM1;
+	[NativeDisableParallelForRestriction]
+	public NativeArray<bool> activeSpots;*/
+	public BubbleQueueInfoV2(int maxAllowedBubblesPerFrom, int nLimit, Allocator allocator)
+	{
+		MAX_MAX_BUBBLES = maxAllowedBubblesPerFrom;
+		N_LIMIT = nLimit;
+		int maxStep = MAX_MAX_BUBBLES * nLimit;
+		//	bDatas = new NativeList<DOTS_Bubble_Data>(allocator);
+		compressedDOTSBubbleInfos = new NativeArray<CompressedDOTSBubbleInfo>(MAX_MAX_BUBBLES, allocator);
+	//	bCalculations = new NativeArray<DOTS_Step_Calculations>(MAX_MAX_BUBBLES, allocator);
+	//	dt126 = new NativeArray<float4>(MAX_MAX_BUBBLES, allocator);
+	//	stepsLNNLNM1 = new NativeArray<int4>(MAX_MAX_BUBBLES, allocator);
+	//	activeSpots = new NativeArray<bool>(MAX_MAX_BUBBLES, allocator);
+		x = new NativeArray<float2>(maxStep, allocator);
+		x_tmp = new NativeArray<float2>(maxStep, allocator);
+		k1 = new NativeArray<float2>(maxStep, allocator);
+		k2 = new NativeArray<float2>(maxStep, allocator);
+		k3 = new NativeArray<float2>(maxStep, allocator);
+		k4 = new NativeArray<float2>(maxStep, allocator);
+	}
+	public void AddData(DOTS_Bubble_Data data)
+	{
+		int index = GetAndLockNextAvailableIndex();
+		if (index > -1)
+			SetData(index, data);
+		else
+			Debug.LogError("Failed to get Next Available Index!");
+
+	}
+	public int GetActiveLength()
+	{
+		int a = 0;
+		for (int i = 0; i < compressedDOTSBubbleInfos.Length; i++)
+			a += compressedDOTSBubbleInfos[i].active ? 1 : 0;
+		return a;
+	}
+	public int GetAndLockNextAvailableIndex()
+	{
+		for (int i = 0; i < compressedDOTSBubbleInfos.Length; i++)
+		{
+			var c = compressedDOTSBubbleInfos[i];
+			if (!c.active)
+			{
+				c.active = true;
+				compressedDOTSBubbleInfos[i] = c;
+				return i;
+			}
+		}
+		return -1;
+	}
+	public void ReleaseLockOnIndex(int index)
+	{
+		var c = compressedDOTSBubbleInfos[index];
+		c.active = false;
+	}
+	public void SetData(int index, DOTS_Bubble_Data data)
+	{
+		int startIndex = index * N_LIMIT;
+		float dt = (data.endTime - data.startTime) / (data.steps - 1);
+		//	bCalculations[index] = new DOTS_Step_Calculations(data);
+		//	stepsLNNLNM1[index] = new int4(startIndex, startIndex + N_LIMIT - 1, data.steps, data.steps);
+
+		//	dt126[index] = new float4(data.startTime, dt, dt / 2, dt / 6);
+		compressedDOTSBubbleInfos[index] = new CompressedDOTSBubbleInfo
+		{
+			calculations = new DOTS_Step_Calculations(data),
+			dt126 = new float4(data.startTime, dt, dt / 2, dt / 6),
+			stepsLNNLNM1 = new int4(startIndex, startIndex + N_LIMIT - 1, data.steps, data.steps),
+			active = true
+		};
+		x[startIndex] = 0;
+		x_tmp[startIndex] = 0;
+		k1[startIndex] = 0;
+		k2[startIndex] = 0;
+		k3[startIndex] = 0;
+		k4[startIndex] = 0;
+	}
+	public bool IsActive(int index)
+    {
+		if (index < compressedDOTSBubbleInfos.Length)
+			return compressedDOTSBubbleInfos[index].active;
+
+		Debug.LogError("IsActive: given index exceed bounds!");
+		return false;
+    }
+	public void ClearXArray()
+	{
+		for (int i = 0; i < x.Length; i++)
+			x[i] = 0;
+	}
+	public void MulticoreClearXArray(int i)
+	{
+		x[i] = 0;
+	}
+	public void MulticoreClearAllArrays(int i)
+	{
+		x[i] = 0;
+		x_tmp[i] = 0;
+		k1[i] = 0;
+		k2[i] = 0;
+		k3[i] = 0;
+		k4[i] = 0;
+	}
+
+	public void Dispose()
+	{
+		x.Dispose();
+		x_tmp.Dispose();
+		k1.Dispose();
+		k2.Dispose();
+		k3.Dispose();
+		k4.Dispose();
+		compressedDOTSBubbleInfos.Dispose();
+	//	bCalculations.Dispose();
+	//	stepsLNNLNM1.Dispose();
+	//	dt126.Dispose();
+	//	activeSpots.Dispose();
+	}
+	public void DeregisterData(int index)
+	{
+		var c = compressedDOTSBubbleInfos[index];
+		c.active = false;
+	}
+	public void DeregisterData(ref CompressedDOTSBubbleInfo c)
+	{
+		c.active = false;
+	}
+	public void ExecuteRungeKutta4(int index)
+	{
+		//TODO: look into doing a back and forth thing so we don't have
+		// to waste time setting variables
+		// set the last calculated value to the beggining
+		var c = compressedDOTSBubbleInfos[index];
+		if (c.active && c.stepsLNNLNM1.w == 0)
+		{
+			DeregisterData(ref c);
+			compressedDOTSBubbleInfos[index] = c;
+		}
+		if (c.active)
+		{
+
+			int min = math.min(N_LIMIT, c.stepsLNNLNM1.w);
+			int max = c.stepsLNNLNM1.x + min;
+			//	Debug.Log($"before x0 = {x[stepData.x]},{x[stepData.y]},{stepData.x},{stepData.y},{max},{x.Length}");
+			x[c.stepsLNNLNM1.x] = x[c.stepsLNNLNM1.y];
+			//	Debug.Log($"AFTER x0 = {x[stepData.x]},{x[stepData.y]},{stepData.x},{stepData.y},{max},{x.Length}");
+			x_tmp[c.stepsLNNLNM1.x] = x_tmp[c.stepsLNNLNM1.y];
+			k1[c.stepsLNNLNM1.x] = k1[c.stepsLNNLNM1.y];
+			k2[c.stepsLNNLNM1.x] = k2[c.stepsLNNLNM1.y];
+			k3[c.stepsLNNLNM1.x] = k3[c.stepsLNNLNM1.y];
+			k4[c.stepsLNNLNM1.x] = k4[c.stepsLNNLNM1.y];
+
+			//	float dt23 = dts.x + dts.z;
+
+			for (int i = c.stepsLNNLNM1.x + 1; i < max; i++)
+			{
+				k1[i] = c.calculations.system(x[i - 1], c.dt126.x);
+				k2[i] = c.calculations.system(x[i - 1] + k1[i] * c.dt126.z, c.dt126.x + c.dt126.z);
+				k3[i] = c.calculations.system(x[i - 1] + k2[i] * c.dt126.z, c.dt126.x + c.dt126.z);
+				k4[i] = c.calculations.system(x[i - 1] + k3[i] * c.dt126.y, c.dt126.x + c.dt126.y);
+				x[i] = x[i - 1] + c.dt126.w * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+
+				c.dt126.x += c.dt126.y;
+			}
+
+			c.stepsLNNLNM1.w -= min;
+			compressedDOTSBubbleInfos[index] = c;
+		}
+	}
+}
 
 [System.Serializable]
 public struct DOTS_Bubble_Data : IComponentData, IComparer<DOTS_Bubble_Data>
@@ -286,21 +518,18 @@ public struct DOTS_Bubble_Data : IComponentData, IComparer<DOTS_Bubble_Data>
 		Fast_Formatted
 	}
 
-	public MovingType m_movingtype;
-	public InterfaceType m_interfacetype;
+	public int m_movingtype;
+	public int m_interfacetype;
 	[Range(0, 16)]
 	public float radius;
 	[Range(0, 16)]
 	public float depth;
 	public float startTime, endTime;
 	public int steps;
-	//public int from, to;
-	public bool IsInitialized;
 	public float timeLeft;
-	//public float2 minmax;
 	public Entity entity;
 
-	public DOTS_Bubble_Data(InterfaceType interface_type,MovingType moving_type,
+	public DOTS_Bubble_Data(int interface_type,int moving_type,
 		float radius, float depth,/* int from, int to,*/ float startTime, float endTime, int steps,float timeLeft,
 		Entity e)
 	{
@@ -310,9 +539,8 @@ public struct DOTS_Bubble_Data : IComponentData, IComparer<DOTS_Bubble_Data>
 
 		int multiplier = DEFAULT_STEPS / steps;
 		radius *= multiplier;
-
-		m_interfacetype = interface_type;
-		m_movingtype = moving_type;
+		m_interfacetype = (int)interface_type;
+		m_movingtype = (int)moving_type;
 		this.depth = depth * radius / 1000f * 2f;
 		this.radius = radius / 1000f;
 	//	this.from = from;
@@ -322,12 +550,11 @@ public struct DOTS_Bubble_Data : IComponentData, IComparer<DOTS_Bubble_Data>
 		this.endTime = endTime;
 		this.timeLeft = timeLeft;
 		entity = e;
-		IsInitialized = false;
 	//	minmax = new float2();
 	}
-	public static float BubbleCapacitance(byte interface_type, float radius, float depth)
+	public static float BubbleCapacitance(int interface_type, float radius, float depth)
 	{
-		if (interface_type == (byte)InterfaceType.Rigid)
+		if (interface_type != (int)InterfaceType.Rigid)
 			return radius / (1f - radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
 		else // Rigid interface
 			return radius / (1f + radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
@@ -389,7 +616,6 @@ public struct DOTS_Bubble_Data : IComponentData, IComparer<DOTS_Bubble_Data>
 
 		return jval;
 	}
-
 
 	// Calculate the bubble terminal velocity according to the paper
 	// Rising Velocity for Single Bubbles in Pure Liquids
@@ -636,10 +862,22 @@ public struct BubbleGenerationRequest : IComponentData {
 [BurstCompile]
 public struct DOTS_Step_Calculations
 {
-	private DOTS_Bubble_Data.InterfaceType interfaceType;
-	private DOTS_Bubble_Data.MovingType movingType;
-	private float radius, depth;
-	private float p0, v0, k;
+	private int m_interfaceType;
+	private int m_movingType;
+
+	private bool interfaceType
+	{
+		get { return m_interfaceType == 1; }
+		set { m_interfaceType = value ? 1 : 0; }
+	}
+	private bool movingType
+	{
+		get { return m_movingType == 1; }
+		set { m_movingType = value ? 1 : 0; }
+	}
+
+	public float radius, depth;
+	public float p0, v0, k;
 	// For Jet Forcing
 	float cutoff, mrp, jval_initial;
 	// Bubble Terminal Velocity
@@ -648,15 +886,31 @@ public struct DOTS_Step_Calculations
 	// rising bubble
 	private float rising_d_m1;
 	// Actual Freq
-	private float AF_v0, AF_omega_a, AF_b;
+	public float AF_v0, AF_omega_a, AF_b;
 	// Calculate Beta
-	private float B_dr_a, B_dvis_a, B_dvis_b, B_phi_a, B_phi_B, B_dth_a;
+	public float B_dr_a, B_dvis_a, B_dvis_b, B_phi_a, B_phi_B, B_dth_a;
+
+	public string ToString(bool format = true)
+    {
+        if (format)
+        {
+			return $"interfaceType: {m_interfaceType},movingType: {m_movingType}\n" +
+				$"\nradius: {radius},depth: {depth}, \n" +
+				$"[p0,v0,k]: [{p0},{v0},{k}]\n" +
+				$"[cutoff,mrp,jval_initial]: [{cutoff},{mrp},{jval_initial}]\n" +
+				$"[vt,rising_d_m1,AF_v0,AF_omega_a,AF_B]: [{vt},{rising_d_m1},{AF_v0},{AF_omega_a},{AF_b}]\n" +
+				$"[B_dr_a, B_dvis_a, B_dvis_b, B_phi_a, B_phi_B, B_dth_a]: [{B_dr_a}, {B_dvis_a}, {B_dvis_b}, {B_phi_a}, {B_phi_B}, {B_dth_a}]";
+
+		}
+		return "";
+    }
+
 	public DOTS_Step_Calculations(DOTS_Bubble_Data data)
 	{
 		radius = data.radius;
 		depth = data.depth;
-		interfaceType = data.m_interfacetype;
-		movingType = data.m_movingtype;
+		m_interfaceType = data.m_interfacetype;
+		m_movingType = data.m_movingtype;
 
 		p0 = DOTS_Bubble_Data.PATM + 2.0f * DOTS_Bubble_Data.SIGMA / data.radius;
 		v0 = 4f / 3f * math.PI * math.pow(data.radius, 3);
@@ -671,7 +925,7 @@ public struct DOTS_Step_Calculations
 		// Bubble Terminal Velocity
 		vt = BubbleTerminalVelocity(data.radius);
 		// Rising Bubble
-		if (data.m_movingtype == DOTS_Bubble_Data.MovingType.Rising)
+		if (data.m_movingtype == (int)DOTS_Bubble_Data.MovingType.Rising)
 			rising_d_m1 = 0.51f * 2f * data.radius;
 		else
 			rising_d_m1 = data.depth;
@@ -688,12 +942,13 @@ public struct DOTS_Step_Calculations
 		B_dth_a = (3f * DOTS_Bubble_Data.GAMMA - 1f) /
 				 (3f * (DOTS_Bubble_Data.GAMMA - 1));
 	}
-	public float JetForcing(float t)
+	public static float JetForcing(float t,float cutoff,float jval_initial)
 	{
 		if (t < 0 || t > cutoff)
 			return 0;
 		return jval_initial * math.pow(t, 2);
 	}
+
 	public static float BubbleTerminalVelocity(float r)
 	{
 
@@ -714,7 +969,7 @@ public struct DOTS_Step_Calculations
 
 		return vt;
 	}
-	public static float ActualFreq(DOTS_Bubble_Data.InterfaceType interface_type, float radius, float depth, float v0, float AF_omega_a)
+	public static float ActualFreq(bool interface_type, float radius, float depth, float v0, float AF_omega_a)
 	{
 		float bubbleCapacitance = BubbleCapacitance(interface_type, radius, depth);
 
@@ -722,9 +977,9 @@ public struct DOTS_Step_Calculations
 
 		return omega / 2f / math.PI;
 	}
-	public static float BubbleCapacitance(DOTS_Bubble_Data.InterfaceType interface_type, float radius, float depth)
+	public static float BubbleCapacitance(bool interface_type, float radius, float depth)
 	{
-		if (interface_type == DOTS_Bubble_Data.InterfaceType.Rigid)
+		if (interface_type)
 			return radius / (1f - radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
 		else // Rigid interface
 			return radius / (1f + radius / (2f * depth) - math.pow((radius / (2f * depth)), 4));
@@ -748,11 +1003,10 @@ public struct DOTS_Step_Calculations
 	public float2 system(float2 Y, float t)
 	{
 		//[f'; f]
-		float f = JetForcing((float)t - 0.1f);
+		float f = JetForcing((float)t - 0.1f,cutoff,jval_initial);
 
 		float d = depth;
-
-		if (movingType == DOTS_Bubble_Data.MovingType.Rising && t >= 0.1f)
+		if (movingType && t >= 0.1f)
 		{
 			// rising bubble, calc depth
 
@@ -776,10 +1030,10 @@ public struct DOTS_Step_Calculations
 
 			float acc = f / m - 2 * beta * (float)Y[0] - math.pow(w0, 2) * (float)Y[1];
 
-			if (float.IsNaN(acc))
-			{
+		//	if (float.IsNaN(acc))
+		//	{
 				//		Debug.Log("DETECTED NAN! f: " + f + ", m: " + m + ", w0: " + w0 + ", beta: " + beta + ", t: " + t + ", y[0]=" + Y[0] + ", y[1]=" + Y[1]);
-			}
+		//	}
 			//	if (acc != 0 || Y[0] != 0 || Y[1] != 0)
 			//		Debug.Log($"{acc},{Y[0]},{Y[1]}");
 			return new float2(acc, Y[0]);
@@ -796,232 +1050,406 @@ public struct DOTS_Step_Calculations
 #endif
 public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 {
+	internal struct GPU_DOTSBubbleData
+    {
+		public int m_movingtype;
+		public int m_interfacetype;
+		public float radius;
+		public float depth;
+		public float startTime, endTime;
+		public int steps;
+		public float timeLeft;
+		public int index;
+
+		public GPU_DOTSBubbleData(DOTS_Bubble_Data d)
+        {
+			m_movingtype = d.m_movingtype;
+			m_interfacetype = d.m_interfacetype;
+			radius = d.radius;
+			depth = d.depth;
+			startTime = d.startTime;
+			endTime = d.endTime;
+			steps = d.steps;
+			timeLeft = d.timeLeft;
+			index = -1;
+        }
+	};
 	[BurstCompile]
 	private struct ExecuteQueueOnMultipleCoresV2 : IJobParallelFor
 	{
-		public BubbleQueueInfo QInfo;
+		public BubbleQueueInfoV2 QInfo;
+		
 		public void Execute(int index)
 		{
-			QInfo.ExecuteRungeKutta4(index);
+				QInfo.ExecuteRungeKutta4(index);
 		}
 	}
-	[BurstCompile]
-    private struct ClearPostProcessingNativeArrayJob : IJobParallelFor
-	{
-		[NativeDisableParallelForRestriction]
-		public NativeArray<float> PostProcessingOutput;
-		public void Execute(int index)
-        {
-			PostProcessingOutput[index] = 0;
-        }
-    }
 	[BurstCompile]
 	private struct MulticoreAcousticPostProcessingJobAV3 : IJobParallelFor
 	{
 		[ReadOnly]
-		public BubbleQueueInfo QInfo;
+		public BubbleQueueInfoV2 QInfo;
+		[ReadOnly]
+		public float PostProcessingMultiplier;
 		[NativeDisableParallelForRestriction]
 		public NativeArray<float> PostProcessingOutput;
 		public void Execute(int index)
 		{
-		/*	int i = 0;
-			var bInfo = QInfo.stepsLNNLNM1[index];
-			for (int j = bInfo.x; j < bInfo.y; j++)
-			{
-				PostProcessingOutput[i] += QInfo.x[j].y;
-				i++;
-			}
-			*/
-			for(int i = 0; i < QInfo.stepsLNNLNM1.Length; i++)
+			float totalWaveform = 0;
+			for(int i = 0; i < MAX_BUBBLES; i++)
             {
-				PostProcessingOutput[index] += QInfo.x[QInfo.stepsLNNLNM1[i].x + index].y;
+				var c = QInfo.compressedDOTSBubbleInfos[i];
+				if (c.active)
+				{		
+					 totalWaveform += QInfo.x[c.stepsLNNLNM1.x + index].y;
+				}
             }
+			PostProcessingOutput[index] = totalWaveform * PostProcessingMultiplier;
+			if(float.IsInfinity(PostProcessingOutput[index]) || 
+				float.IsNaN(PostProcessingOutput[index]))
+					PostProcessingOutput[index] = 0;
 
+			PostProcessingOutput[index] = math.clamp(PostProcessingOutput[index], -1, 1);
 		}
 	}
 	[BurstCompile]
-	private struct MulticorePostProcessingC : IJobParallelFor
-	{
-		public NativeArray<float> PostProcessingOutput;
-		[ReadOnly]
-		public NativeArray<float> data;
-		public void Execute(int index)
-		{
-			PostProcessingOutput[index] *= data[1];
-		}
-	}
-	[BurstCompile]
-	private struct PostProcessingJobB : IJob
+	public struct InitializeDataJob : IJob
 	{
 		[ReadOnly]
-		public NativeArray<float> PostProcessingOutput;
-		// data[0] = max value
-		// data[1] = multiplier
-		public NativeArray<float> data;
+		public NativeArray<DOTS_Bubble_Data> bubbles;
+		[NativeDisableParallelForRestriction]
+		public BubbleQueueInfoV2 bubbleQueue;
 		public void Execute()
 		{
-			if (data.Length != 2)
-				Debug.LogError($"PostProcessingJobB: given data NativeArray is not equal to 2 which is expected, got {data.Length}");
-			else
-			{
-				//NOTE: we only apply change to raw_data[i].y as the x is useless to us atm
-				data[0] = DOTS_Bubble_Data.GetMax(PostProcessingOutput);
-				data[1] = 1.05f / data[0];
-			}
+			for(int index = 0; index < bubbles.Length; index++)
+				bubbleQueue.AddData(bubbles[index]);
 		}
 	}
-	private static int ALLOWED_BUBBLES_PER_FRAME = 10;
+	[BurstCompile]
+	public struct InitializeDataFroGPUJob : IJob
+	{
+		[ReadOnly]
+		public NativeArray<DOTS_Bubble_Data> bubbles;
+		public NativeArray<CompressedDOTSBubbleInfo> compressedDOTSBubbleInfos;
+		internal NativeArray<GPU_DOTSBubbleData> gpu_data;
+
+        public void Execute()
+        {
+			for (int i = 0; i < bubbles.Length; i++)
+			{
+				int index = -1;
+				for (int j = 0; j < compressedDOTSBubbleInfos.Length; j++)
+				{
+					var c = compressedDOTSBubbleInfos[j];
+					if (!c.active)
+					{
+						c.active = true;
+						index = j;
+						compressedDOTSBubbleInfos[j] = c;
+						break;
+					}
+
+				}
+				var d  = new GPU_DOTSBubbleData(bubbles[i]);
+				d.index = index;
+				gpu_data[i] = d;
+			}
+        }
+    }
+
+	public const int MAX_BUBBLES = 32;
 	public const int AudioSourceDataLimit = 4096;
+	public bool UseGPU = false;
 	EntityQuery BubbleRequestQuery;
 	internal ComputeShader shader;
-	ComputeBuffer buffer;
+
+	public ComputeBuffer compressedDOTSBubbleDataBuffer;
+	public ComputeBuffer PostProcessingOutputBuffer;
+	public ComputeBuffer DOTSBubbleDataGPUBuffer;
+	public ComputeBuffer XBuffer;
+	public ComputeBuffer X_tmpBuffer;
+	public ComputeBuffer k1Buffer;
+	public ComputeBuffer k2Buffer;
+	public ComputeBuffer k3Buffer;
+	public ComputeBuffer k4Buffer;
+
+	NativeList<DOTS_Bubble_Data> tmpBubbleData;
+	NativeArray<GPU_DOTSBubbleData> tmpGPUBubbleData;
 	// we need this to bereferenceable from the other job for now
 
-	internal BubbleQueueInfo bubbleQueueInfo;
+	internal BubbleQueueInfoV2 bubbleQueueInfo;
 
-	NativeArray<float> tmpData;
+	float2[] x;
+	CompressedDOTSBubbleInfo[] compressedDOTSBubbleInfos;
+	float[] PPO;
+
+	int RungeKuttaKernel, PostProcessingKernel,SetDataKernal;
+
 	protected override void OnCreate()
     {
 		PostProcessingOutput = new NativeArray<float>(AudioSourceDataLimit, Allocator.Persistent);
 		zeroData = new float[0];
 		// Create our Bubble Query
 		BubbleRequestQuery = GetEntityQuery(typeof(BubbleGenerationRequest),typeof(DOTS_Bubble_Data));
-		bubbleQueueInfo = new BubbleQueueInfo(ALLOWED_BUBBLES_PER_FRAME, AudioSourceDataLimit, Allocator.Persistent);
-		tmpData = new NativeArray<float>(2, Allocator.Persistent);
-		tmpData[1] = 6666666666;// 1/1.5E-10 = 6666666666
-		buffer = new ComputeBuffer(1000, sizeof(float) * 1000);
+		bubbleQueueInfo = new BubbleQueueInfoV2(MAX_BUBBLES, AudioSourceDataLimit, Allocator.Persistent);
+		tmpBubbleData = new NativeList<DOTS_Bubble_Data>(Allocator.Persistent);
+		tmpGPUBubbleData = new NativeArray<GPU_DOTSBubbleData>(MAX_BUBBLES,Allocator.Persistent);
+		PostProcessingMultiplier = 6666666666;// 1/1.5E-10 = 6666666666
+        unsafe
+		{
+			int max = MAX_BUBBLES * AudioSourceDataLimit;
+			x = new float2[max];
+			PPO = new float[AudioSourceDataLimit];
+			compressedDOTSBubbleInfos = new CompressedDOTSBubbleInfo[MAX_BUBBLES];
+			
+			compressedDOTSBubbleDataBuffer = new ComputeBuffer(MAX_BUBBLES, sizeof(CompressedDOTSBubbleInfo));
+			PostProcessingOutputBuffer = new ComputeBuffer(AudioSourceDataLimit,sizeof(float));
+			DOTSBubbleDataGPUBuffer = new ComputeBuffer(MAX_BUBBLES,sizeof(GPU_DOTSBubbleData));
+			XBuffer = new ComputeBuffer(max, sizeof(float2));
+			X_tmpBuffer = new ComputeBuffer(max, sizeof(float2));
+			k1Buffer = new ComputeBuffer(max, sizeof(float2));
+			k2Buffer = new ComputeBuffer(max, sizeof(float2));
+			k3Buffer = new ComputeBuffer(max, sizeof(float2));
+			k4Buffer = new ComputeBuffer(max, sizeof(float2));
+		}
 	}
-    protected override void OnDestroy()
+	protected override void OnDestroy()
     {
 		bubbleQueueInfo.Dispose();
 		PostProcessingOutput.Dispose();
-		tmpData.Dispose();
-		buffer.Release();
-		buffer = null;
+		tmpBubbleData.Dispose();
+		tmpGPUBubbleData.Dispose();
+
+		compressedDOTSBubbleDataBuffer.Dispose();
+		PostProcessingOutputBuffer.Dispose();
+		DOTSBubbleDataGPUBuffer.Dispose();
+		XBuffer.Dispose();
+		X_tmpBuffer.Dispose();
+		k1Buffer.Dispose();
+		k2Buffer.Dispose();
+		k3Buffer.Dispose();
+		k4Buffer.Dispose();
 	}
 	protected override void OnStartRunning()
 	{
 		liveBubbleData = new float[AudioSourceDataLimit];
 		SetupBubbleSound("Test", 1, sampleRate, true);
+
+		RungeKuttaKernel = shader.FindKernel("ExecuteRungeKutta");
+		PostProcessingKernel = shader.FindKernel("PostProcessing");
+		SetDataKernal = shader.FindKernel("InitializeBubbleData");
+
+
+		shader.SetInt("N_LIMIT", AudioSourceDataLimit);
+		shader.SetInt("MAX_BUBBLES", MAX_BUBBLES);
+		shader.SetFloat("PostProcessingMultiplier", PostProcessingMultiplier);
+
+
+		XBuffer.SetData(bubbleQueueInfo.x);
+		X_tmpBuffer.SetData(bubbleQueueInfo.x_tmp);
+		k1Buffer.SetData(bubbleQueueInfo.k1);
+		k2Buffer.SetData(bubbleQueueInfo.k2);
+		k3Buffer.SetData(bubbleQueueInfo.k3);
+		k4Buffer.SetData(bubbleQueueInfo.k4);
+
+		shader.SetBuffer(SetDataKernal, "x", XBuffer);
+		shader.SetBuffer(SetDataKernal, "x_tmp", X_tmpBuffer);
+		shader.SetBuffer(SetDataKernal, "k1", k1Buffer);
+		shader.SetBuffer(SetDataKernal, "k2", k2Buffer);
+		shader.SetBuffer(SetDataKernal, "k3", k3Buffer);
+		shader.SetBuffer(SetDataKernal, "k4", k4Buffer);
+
+		shader.SetBuffer(RungeKuttaKernel, "x", XBuffer);
+		shader.SetBuffer(RungeKuttaKernel, "x_tmp", X_tmpBuffer);
+		shader.SetBuffer(RungeKuttaKernel, "k1", k1Buffer);
+		shader.SetBuffer(RungeKuttaKernel, "k2", k2Buffer);
+		shader.SetBuffer(RungeKuttaKernel, "k3", k3Buffer);
+		shader.SetBuffer(RungeKuttaKernel, "k4", k4Buffer);
+
+		shader.SetBuffer(PostProcessingKernel, "x", XBuffer);
+
 	}
 	protected override void OnUpdate()
-    {
-        {
-			if (BubbleRequestQuery.CalculateEntityCount() > 0)
+	{
+		if(tmpBubbleData.Length > 0)
+			tmpBubbleData.Clear(); 
+		if (BubbleRequestQuery.CalculateEntityCount() > 0)
+		{
+			// collected the new bubble requests
+			var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
+			tmpBubbleData.AddRange(bubbles);// new NativeArray<DOTS_Bubble_Data>(bubbles.Length, Allocator.Persistent);
+			bubbles.CopyTo(tmpBubbleData);
+			// for debugging purposes only!
+			var entities = BubbleRequestQuery.ToEntityArray(Allocator.TempJob);
+
+		//	bubbleQueueInfo.AddRange(bubbles, Allocator.Persistent);
+
+			// we no longer need this array so we can dispose it
+		//	EntityManager.DestroyEntity(entities);
+			EntityManager.RemoveComponent<BubbleGenerationRequest>(entities);
+			entities.Dispose();
+			bubbles.Dispose();
+        }
+	//	if (save == 1)
+	//		return;
+		if (bubbleQueueInfo.GetActiveLength() > 0 || tmpBubbleData.Length > 0)
+		{
+
+			JobHandle GenerateJob = Dependency;
+			if (tmpBubbleData.Length > 0)
 			{
-				// collected the new bubble requests
-				var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
-				// for debugging purposes only!
-				var entities = BubbleRequestQuery.ToEntityArray(Allocator.TempJob);
+				if (UseGPU)
+				{
+					GenerateJob = new InitializeDataFroGPUJob
+					{
+						bubbles = tmpBubbleData,
+						compressedDOTSBubbleInfos = bubbleQueueInfo.compressedDOTSBubbleInfos,
+						gpu_data = tmpGPUBubbleData
+					}.Schedule(Dependency);
+					GenerateJob.Complete();
 
-				bubbleQueueInfo.AddRange(bubbles, Allocator.Persistent);
+				//	Debug.Log($"{SetDataKernal},{RungeKuttaKernel},{PostProcessingKernel}");
+				//	Debug.Log($"r {tmpGPUBubbleData[0].radius}");
 
-				// we no longer need this array so we can dispose it
-				EntityManager.DestroyEntity(entities);
-				entities.Dispose();
-				bubbles.Dispose();
+					DOTSBubbleDataGPUBuffer.SetData(tmpGPUBubbleData);
+					compressedDOTSBubbleDataBuffer.SetData(bubbleQueueInfo.compressedDOTSBubbleInfos);
+					PostProcessingOutputBuffer.SetData(PostProcessingOutput);
+
+					shader.SetBuffer(SetDataKernal, "bubbleData", DOTSBubbleDataGPUBuffer);
+					shader.SetBuffer(SetDataKernal, "compressedDOTSBubbleDataBuffer", compressedDOTSBubbleDataBuffer);
+
+					shader.SetBuffer(RungeKuttaKernel, "compressedDOTSBubbleDataBuffer", compressedDOTSBubbleDataBuffer);
+					shader.SetBuffer(RungeKuttaKernel, "PostProcessingOutput", PostProcessingOutputBuffer);
+
+					shader.SetBuffer(PostProcessingKernel, "PostProcessingOutput", PostProcessingOutputBuffer);
+					shader.SetBuffer(PostProcessingKernel, "compressedDOTSBubbleDataBuffer", compressedDOTSBubbleDataBuffer);
+                }
+                else
+                {
+					GenerateJob = new InitializeDataJob
+					{
+						bubbleQueue = bubbleQueueInfo,
+						bubbles = tmpBubbleData
+					}.Schedule(Dependency);
+					GenerateJob.Complete();
+				}
 			}
-			bubbleQueueInfo.CleanUp();
-			if (bubbleQueueInfo.stepsLNNLNM1.Length > 0)
+			if (UseGPU)
 			{
-				var GenerateJob = new ExecuteQueueOnMultipleCoresV2
-				{
-					QInfo = bubbleQueueInfo
-				}.Schedule(bubbleQueueInfo.stepsLNNLNM1.Length, 1);
+			//	Debug.Log(tmpGPUBubbleData.Length);
+				if(tmpBubbleData.Length > 0)
+					shader.Dispatch(SetDataKernal,tmpBubbleData.Length,1,1);
+				shader.Dispatch(RungeKuttaKernel, bubbleQueueInfo.compressedDOTSBubbleInfos.Length, 1, 1);
+				shader.Dispatch(PostProcessingKernel, PostProcessingOutput.Length, 1, 1);
+
+				compressedDOTSBubbleDataBuffer.GetData(compressedDOTSBubbleInfos);
+				PostProcessingOutputBuffer.GetData(PPO);
+				
+				bubbleQueueInfo.compressedDOTSBubbleInfos.CopyFrom(compressedDOTSBubbleInfos);
+				PostProcessingOutput.CopyFrom(PPO);
+
+				Debug.Log("cc:"+compressedDOTSBubbleInfos[0].calculations.radius);
+			}
+			else
+			{
+				var ExecuteJob = //GenerateJob;
+				new ExecuteQueueOnMultipleCoresV2
+					   {
+						   QInfo = bubbleQueueInfo
+					   }.Schedule(bubbleQueueInfo.compressedDOTSBubbleInfos.Length, 1,GenerateJob);
+				//UnityEngine.Rendering.AsyncGPUReadback.
+
 				// POST PROCESSING!
-				var ResetPostProcessingJob = new ClearPostProcessingNativeArrayJob
-				{
-					PostProcessingOutput = PostProcessingOutput
-				}.Schedule(PostProcessingOutput.Length, 1, GenerateJob);
-				var PostProcessingJobHandleA = new MulticoreAcousticPostProcessingJobAV3
+
+				var PostProcessingJobHandleA = //ResetPostProcessingJob;
+				new MulticoreAcousticPostProcessingJobAV3
 				{
 					QInfo = bubbleQueueInfo,
-					PostProcessingOutput = PostProcessingOutput
-				}.Schedule(PostProcessingOutput.Length, 1, ResetPostProcessingJob);
-				// TODO: Determine if this is needed?
-				/*	var PostProcessingJobHandleB = new PostProcessingJobB
+					PostProcessingOutput = PostProcessingOutput,
+					PostProcessingMultiplier = PostProcessingMultiplier
+				}.Schedule(PostProcessingOutput.Length, 1,ExecuteJob);
+				PostProcessingJobHandleA.Complete();
+			}
+		/*	for (int i = 0; i < PostProcessingOutput.Length; i++)
+			{
+				Debug.Log($"A: {PostProcessingOutput[i]}");
+			}	*/
+		//	Debug.Log($"B: {compressedDOTSBubbleInfos[0].dt126.xyzw}");
+			
+			//	Debug.Log(bubbleQueueInfo.compressedDOTSBubbleInfos[0].stepsLNNLNM1.w);
+			//	if (bubbleQueueInfo.compressedDOTSBubbleInfos[0].stepsLNNLNM1.w == 0)
+			//		save = 1;
+
+			//	ExportWaveDataToCSV();
+
+			SetLiveBubbleData(PostProcessingOutput.ToArray());
+		}
+		else
+		{
+			//Debug.Log("Setting zero");
+			//	save++;
+			SetLiveBubbleData(zeroData);
+			//	ExportWaveDataToCSV();
+		}
+
+		{
+			/*Version 2 Multicore CPU
+			 * if (BubbleRequestQuery.CalculateEntityCount() > 0)
+				{
+					// collected the new bubble requests
+					var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
+					// for debugging purposes only!
+					var entities = BubbleRequestQuery.ToEntityArray(Allocator.TempJob);
+
+					bubbleQueueInfo.AddRange(bubbles, Allocator.Persistent);
+
+					// we no longer need this array so we can dispose it
+					EntityManager.DestroyEntity(entities);
+					entities.Dispose();
+					bubbles.Dispose();
+				}
+				bubbleQueueInfo.CleanUp();
+				if (bubbleQueueInfo.stepsLNNLNM1.Length > 0)
+				{
+					var GenerateJob = new ExecuteQueueOnMultipleCoresV2
+					{
+						QInfo = bubbleQueueInfo
+					}.Schedule(bubbleQueueInfo.stepsLNNLNM1.Length, 1);
+					// POST PROCESSING!
+					var ResetPostProcessingJob = new ClearPostProcessingNativeArrayJob
+					{
+						PostProcessingOutput = PostProcessingOutput
+					}.Schedule(PostProcessingOutput.Length, 1, GenerateJob);
+					var PostProcessingJobHandleA = new MulticoreAcousticPostProcessingJobAV3
+					{
+						QInfo = bubbleQueueInfo,
+						PostProcessingOutput = PostProcessingOutput
+					}.Schedule(PostProcessingOutput.Length, 1, ResetPostProcessingJob);
+					// TODO: Determine if this is needed?
+					//	var PostProcessingJobHandleB = new PostProcessingJobB
+					//	{
+					//		PostProcessingOutput = PostProcessingOutput,
+					//		data = tmpData
+					//	}.Schedule(PostProcessingJobHandleA);
+					var PostProcessingJobHandleC = new MulticorePostProcessingC
 					{
 						PostProcessingOutput = PostProcessingOutput,
 						data = tmpData
-					}.Schedule(PostProcessingJobHandleA);*/
-				var PostProcessingJobHandleC = new MulticorePostProcessingC
+					}.Schedule(PostProcessingOutput.Length, 1, PostProcessingJobHandleA);
+
+
+					PostProcessingJobHandleC.Complete();
+
+					//	ExportWaveDataToCSV();
+
+					SetLiveBubbleData(PostProcessingOutput.ToArray());
+				}
+				else
 				{
-					PostProcessingOutput = PostProcessingOutput,
-					data = tmpData
-				}.Schedule(PostProcessingOutput.Length, 1, PostProcessingJobHandleA);
-
-
-				PostProcessingJobHandleC.Complete();
-
-				//	ExportWaveDataToCSV();
-
-				SetLiveBubbleData(PostProcessingOutput.ToArray());
-			}
-			else
-			{
-				//	save++;
-				SetLiveBubbleData(zeroData);
-				//	ExportWaveDataToCSV();
-			}
-		}
-        {
-		/*Version 2 Multicore CPU
-		 * if (BubbleRequestQuery.CalculateEntityCount() > 0)
-			{
-				// collected the new bubble requests
-				var bubbles = BubbleRequestQuery.ToComponentDataArray<DOTS_Bubble_Data>(Allocator.TempJob);
-				// for debugging purposes only!
-				var entities = BubbleRequestQuery.ToEntityArray(Allocator.TempJob);
-
-				bubbleQueueInfo.AddRange(bubbles, Allocator.Persistent);
-
-				// we no longer need this array so we can dispose it
-				EntityManager.DestroyEntity(entities);
-				entities.Dispose();
-				bubbles.Dispose();
-			}
-			bubbleQueueInfo.CleanUp();
-			if (bubbleQueueInfo.stepsLNNLNM1.Length > 0)
-			{
-				var GenerateJob = new ExecuteQueueOnMultipleCoresV2
-				{
-					QInfo = bubbleQueueInfo
-				}.Schedule(bubbleQueueInfo.stepsLNNLNM1.Length, 1);
-				// POST PROCESSING!
-				var ResetPostProcessingJob = new ClearPostProcessingNativeArrayJob
-				{
-					PostProcessingOutput = PostProcessingOutput
-				}.Schedule(PostProcessingOutput.Length, 1, GenerateJob);
-				var PostProcessingJobHandleA = new MulticoreAcousticPostProcessingJobAV3
-				{
-					QInfo = bubbleQueueInfo,
-					PostProcessingOutput = PostProcessingOutput
-				}.Schedule(PostProcessingOutput.Length, 1, ResetPostProcessingJob);
-				// TODO: Determine if this is needed?
-				//	var PostProcessingJobHandleB = new PostProcessingJobB
-				//	{
-				//		PostProcessingOutput = PostProcessingOutput,
-				//		data = tmpData
-				//	}.Schedule(PostProcessingJobHandleA);
-				var PostProcessingJobHandleC = new MulticorePostProcessingC
-				{
-					PostProcessingOutput = PostProcessingOutput,
-					data = tmpData
-				}.Schedule(PostProcessingOutput.Length, 1, PostProcessingJobHandleA);
-
-
-				PostProcessingJobHandleC.Complete();
-
-				//	ExportWaveDataToCSV();
-
-				SetLiveBubbleData(PostProcessingOutput.ToArray());
-			}
-			else
-			{
-				//	save++;
-				SetLiveBubbleData(zeroData);
-				//	ExportWaveDataToCSV();
-			}*/
+					//	save++;
+					SetLiveBubbleData(zeroData);
+					//	ExportWaveDataToCSV();
+				}*/
 		}
 		{
 			/*
@@ -1066,7 +1494,7 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 					rk = rk,
 					bubbles = BubbleSoundGenerationQueue,
 					steps = step_calculations,
-					MAX_ALLOWED_BUBBLE_CALCULATED_PER_FRAME = ALLOWED_BUBBLES_PER_FRAME,
+					MAX_ALLOWED_BUBBLE_CALCULATED_PER_FRAME = MAX_BUBBLES,
 				//	convert_to_wave_format = true,
 					ALLOCATED_N_PER_BUBBLE = MAX_AMOUNT_OF_STEPS_PER_BUBBLE
 				}.Schedule(bubbles.Length, 1, SortingJobHandle);
@@ -1075,7 +1503,7 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 				Dependency.Complete();
 
 				// remove request from process entities
-				int max = math.min(ALLOWED_BUBBLES_PER_FRAME, BubbleSoundGenerationQueue.Length);
+				int max = math.min(MAX_BUBBLES, BubbleSoundGenerationQueue.Length);
 				for (int i = 0; i < max; i++)
 					EntityManager.RemoveComponent(BubbleSoundGenerationQueue[i].entity, typeof(BubbleGenerationRequest));
 				// calculate range remove length
@@ -1100,6 +1528,8 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 	float[] liveBubbleData;
 	float[] zeroData;
 	internal bool ProcessNewData = false;
+
+	private float PostProcessingMultiplier;
 	private NativeArray<float> PostProcessingOutput;
 	
 	string finalWave = "";
@@ -1187,7 +1617,7 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 			for (int i = 0; i < max; i++)
 				data[i] = DataInQueue[i];
 			DataInQueue.RemoveRange(0, max);
-			//	Debug.Log($"Setting data! {data.Length}");
+			//	Debug.Log($"Setting data! {max}");
 
 		}
 		else
@@ -1197,3 +1627,4 @@ public partial class DynamicRungeKuttaBubbleSystem : SystemBase
 	}
 
 }
+

@@ -79,8 +79,8 @@ public class GenerateBubbleButtonComponent : MonoBehaviour
         em.CreateEntity(BubbleArchtype, entities);
         for (int j = 0; j < entities.Length; j++)
         {
-            em.SetComponentData(entities[j], new DOTS_Bubble_Data((DOTS_Bubble_Data.InterfaceType)InputInterface.value,
-                (DOTS_Bubble_Data.MovingType)InputMoving.value,float.Parse(InputRadius.text),
+            em.SetComponentData(entities[j], new DOTS_Bubble_Data(InputInterface.value,
+                InputMoving.value,float.Parse(InputRadius.text),
                float.Parse(InputDepth.text),/* int.Parse(InputFrom.text), int.Parse(InputTo.text),*/
                float.Parse(InputStart.text), float.Parse(InputEnd.text), int.Parse(InputSteps.text), float.Parse(InputTimeLeft.text),
                entities[j])
